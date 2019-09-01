@@ -1,0 +1,9 @@
+option( SIXTRL_CXX_ENABLE_XSIMD           "Enable XSIMD library"          OFF )
+option( SIXTRL_CXX_ENABLE_VC              "Enable VC SIMD library"        OFF )
+option( SIXTRL_CXX_ENABLE_BOOST_MULTIPREC "Enable Boost::multiprecision"  OFF )
+
+set( SixTracklib_DIR "${CMAKE_SOURCE_DIR}/external/lib/cmake" )
+set( Clang_DIR "${CMAKE_SOURCE_DIR}/external/clang-llvm/lib/cmake/clang" )
+set( xsimd_DIR "${CMAKE_SOURCE_DIR}/external/xsimd/lib/cmake/xsimd" )
+set( Vc_DIR    "${CMAKE_SOURCE_DIR}/external/Vc/lib/cmake" )
+set( Boost_DIR "${CMAKE_SOURCE_DIR}/external/boost" )
