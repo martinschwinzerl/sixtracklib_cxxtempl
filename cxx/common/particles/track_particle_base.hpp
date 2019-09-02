@@ -4,43 +4,21 @@
 #include <cstddef>
 
 #include "sixtracklib/sixtracklib.hpp"
-#include "cxx/common/internal/obj_store_traits.hpp"
-
+#include "cxx/common/particles/particle_traits.hpp"
 #include "cxx/common/particles/track_particle.h"
 #include "cxx/common/particles/track_particle_data.hpp"
 
-#include "cxx/common/track/obj_track_traits.hpp"
-
 namespace sixtrack_cxx
 {
-    template<> struct ObjDataTrackTraits< ::NS(TrackParticle) >
-    {
-        static SIXTRL_FN constexpr
-        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
-        {
-            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
-        }
-    };
-
-    template< typename R, typename I, std::size_t RAlign, std::size_t IAlign >
-    struct ObjDataTrackTraits<
-        sixtrack_cxx::TrackParticleData< R, I, RAlign, IAlign > >
-    {
-        static SIXTRL_FN constexpr
-        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
-        {
-            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
-        }
-    };
-
-    /* ********************************************************************* */
-
     template< class ParticleData >
     class TrackParticleBase : public ParticleData
     {
         public:
 
         typedef ParticleData particle_data_t;
+
+        typedef typename TrackParticleDataTraits< ParticleData >::real_t real_t;
+        typedef typename TrackParticleDataTraits< ParticleData >::int_t  int_t;
 
         TrackParticleBase() = default;
 
@@ -57,6 +35,23 @@ namespace sixtrack_cxx
             TrackParticleBase< ParticleData >&& other ) = default;
 
         virtual ~TrackParticleBase() = default;
+
+        real_t getEnergy() const
+        {
+            return sixtrack_cxx::TrackParticleData_get_energy( *this );
+        }
+
+        void setEnergy( real_t const& SIXTRL_RESTRICT_REF new_energy )
+        {
+            sixtrack_cxx::TrackParticleData_set_energy( *this, new_energy );
+        }
+
+        void addEnergy( real_t const& SIXTRL_RESTRICT_REF delta_energy )
+        {
+            sixtrack_cxx::TrackParticleData_set_energy( *this,
+                sixtrack_cxx::TrackParticleData_get_energy( *this ) +
+                    delta_energy );
+        }
 
         protected:
 

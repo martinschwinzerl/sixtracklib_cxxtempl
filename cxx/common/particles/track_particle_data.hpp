@@ -5,6 +5,8 @@
 
 #include "sixtracklib/sixtracklib.hpp"
 #include "cxx/common/internal/obj_store_traits.hpp"
+#include "cxx/common/internal/math_constant_traits.hpp"
+#include "cxx/common/track/obj_track_traits.hpp"
 
 namespace sixtrack_cxx
 {
@@ -13,8 +15,8 @@ namespace sixtrack_cxx
         std::size_t IAlign = sixtrack_cxx::TypeStoreTraits< I >::StorageAlign() >
     struct TrackParticleData
     {
-        typedef R             real_t;
-        typedef I             int_t;
+        typedef R real_t;
+        typedef I int_t;
 
         static SIXTRL_FN constexpr std::size_t
         RealAlignment() { return RAlign; }
@@ -46,6 +48,61 @@ namespace sixtrack_cxx
         int_t  at_element_id  SIXTRL_ALIGN( IAlign );
         int_t  at_turn        SIXTRL_ALIGN( IAlign );
         int_t  state          SIXTRL_ALIGN( IAlign );
+    };
+
+    template< typename R, typename I, std::size_t RAlign, std::size_t IAlign >
+    typename TrackParticleData< R, I, RAlign, IAlign >::real_t
+    TrackParticleData_get_energy(
+        TrackParticleData< R, I, RAlign, IAlign > const& SIXTRL_RESTRICT_REF p )
+    {
+        return p.psigma * p.beta0 * p.p0c;
+    }
+
+    template< typename R, typename I, std::size_t RAlign, std::size_t IAlign >
+    void TrackParticleData_set_energy(
+        TrackParticleData< R, I, RAlign, IAlign >& SIXTRL_RESTRICT_REF p,
+        typename TrackParticleData< R, I, RAlign, IAlign >::real_t
+            const& SIXTRL_RESTRICT_REF energy_value )
+    {
+        typedef TrackParticleData< R, I, RAlign, IAlign > particle_data_t;
+        typedef typename particle_data_t::real_t real_t;
+
+        real_t const ptau_beta0 = ( p.beta0 * energy_value ) / p.p0c;
+        real_t const beta0_squ  =  p.beta0 * p.beta0;
+        real_t const beta0_plus_delta_beta0 = ptau_beta0 * ptau_beta0 +
+            ptau_beta0 * MathConstants< real_t >::Two() + beta0_squ;
+
+        p.psigma = ptau_beta0 / beta0_squ;
+        p.delta  = ( beta0_plus_delta_beta0 - p.beta0 ) / p.beta0;
+        p.rpp    = p.beta0 / beta0_plus_delta_beta0;
+        p.rvv    = beta0_plus_delta_beta0 / ( p.beta0 + ptau_beta0 * p.beta0 );
+    }
+
+    /* --------------------------------------------------------------------- */
+
+    template<>
+    struct ObjDataStoreTraits< TrackParticleData< double, int64_t > >
+    {
+        static SIXTRL_FN constexpr
+        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
+        {
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
+        }
+
+        static SIXTRL_FN constexpr bool HasCApiLayout()
+        {
+            return true;
+        }
+    };
+
+    template< class R, class I, std::size_t RealAlign, std::size_t IntAlign >
+    struct ObjDataTrackTraits< TrackParticleData< R, I, RealAlign, IntAlign > >
+    {
+        static SIXTRL_FN constexpr
+        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
+        {
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
+        }
     };
 }
 
