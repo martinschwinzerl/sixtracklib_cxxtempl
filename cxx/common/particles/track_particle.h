@@ -4,6 +4,11 @@
 #include "sixtracklib/sixtracklib.h"
 
 #if defined( __cplusplus )
+
+#include "cxx/common/particles/particle_traits.hpp"
+#include "cxx/common/internal/obj_store_traits.hpp"
+#include "cxx/common/track/obj_track_traits.hpp"
+
 extern "C" {
 #endif /* defined( __cplusplus ) */
 
@@ -36,8 +41,68 @@ typedef struct NS(TrackParticle)
 }
 NS(TrackParticle);
 
+
+
 #if defined( __cplusplus )
 }
+
+/* ------------------------------------------------------------------------- */
+
+namespace sixtrack_cxx
+{
+    ::NS(particle_real_t) TrackParticleData_get_energy(
+        ::NS(TrackParticle) const& SIXTRL_RESTRICT_REF p ) SIXTRL_NOEXCEPT
+    {
+        return p.psigma * p.beta0 * p.p0c;
+    }
+
+    void TrackParticleData_set_energy(
+        ::NS(TrackParticle)& SIXTRL_RESTRICT_REF p,
+        ::NS(particle_real_t) const energy_value ) SIXTRL_NOEXCEPT
+    {
+        typedef ::NS(particle_real_t) real_t;
+
+        real_t const ptau_beta0 = ( p.beta0 * energy_value ) / p.p0c;
+        real_t const beta0_squ  =  p.beta0 * p.beta0;
+        real_t const beta0_plus_delta_beta0 =
+            ptau_beta0 * ptau_beta0 + ptau_beta0 * real_t{ 2 } + beta0_squ;
+
+        p.psigma = ptau_beta0 / beta0_squ;
+        p.delta  = ( beta0_plus_delta_beta0 - p.beta0 ) / p.beta0;
+        p.rpp    = p.beta0 / beta0_plus_delta_beta0;
+        p.rvv    = beta0_plus_delta_beta0 / ( p.beta0 + ptau_beta0 * p.beta0 );
+    }
+
+    template<> struct ObjDataStoreTraits< ::NS(TrackParticle) >
+    {
+        static SIXTRL_FN constexpr
+        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
+        {
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
+        }
+
+        static SIXTRL_FN constexpr bool HasCApiLayout()
+        {
+            return true;
+        }
+    };
+
+    template<> struct ObjDataTrackTraits< ::NS(TrackParticle) >
+    {
+        static SIXTRL_FN constexpr
+        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
+        {
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
+        }
+    };
+
+    template<> struct TrackParticleDataTraits< ::NS(TrackParticle) >
+    {
+        typedef ::NS(particle_real_t)   real_t;
+        typedef ::NS(particle_index_t)  int_t;
+    };
+}
+
 #endif /* defined( __cplusplus ) */
 
 #endif /* SIXTRACKLIB_COMMON_PARTICLES_TRACK_PARTICLE_C99_H__ */
