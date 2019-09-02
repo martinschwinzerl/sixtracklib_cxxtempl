@@ -5,8 +5,6 @@
 #include "cxx/sixtracklib.hpp"
 #include "cxx/ext_libs.h"
 
-#include <boost/multiprecision/cpp_dec_float.hpp>
-
 #include <iostream>
 
 namespace sixtrack_cxx
