@@ -32,6 +32,11 @@ namespace sixtrack_cxx
         {
             return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_INVALID;
         }
+
+        static SIXTRL_FN constexpr bool HasCApiLayout()
+        {
+            return false;
+        }
     };
 
     template< class ObjData >
@@ -39,6 +44,12 @@ namespace sixtrack_cxx
     {
         return ( sixtrack_cxx::ObjDataStoreTraits< ObjData >::ObjTypeId() !=
                  SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_INVALID );
+    }
+
+    template< class ObjData >
+    SIXTRL_FN constexpr bool ObjData_has_same_layout_as_c_api() SIXTRL_NOEXCEPT
+    {
+        return ObjDataStoreTraits< ObjData >::HasCApiLayout();
     }
 }
 
