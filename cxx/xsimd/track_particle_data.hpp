@@ -15,6 +15,7 @@
 #include "cxx/common/particles/track_particle_data.hpp"
 
 #include "cxx/common/track/obj_track_traits.hpp"
+#include "cxx/common/track/particle_track_traits.hpp"
 
 namespace sixtrack_cxx
 {
@@ -52,11 +53,11 @@ namespace sixtrack_cxx
     template< unsigned N >
     struct XsimdTrackParticleData
     {
-        typedef XsimdReal< N >                          real_t;
-        typedef XsimdInt< N >                           int_t;
+        typedef xsimd::batch< double,  N >              real_t;
+        typedef xsimd::batch< int64_t, N >              int_t;
 
-        typedef typename real_t::value_type             raw_real_t;
-        typedef typename int_t::value_type              raw_int_t;
+        typedef double                                  raw_real_t;
+        typedef int64_t                                 raw_int_t;
 
         typedef raw_real_t*                             ptr_raw_real_t;
         typedef raw_int_t*                              ptr_raw_int_t;
@@ -368,12 +369,12 @@ namespace sixtrack_cxx
                                    nullptr );
 
                     SIXTRL_ASSERT( std::uintptr_t{ 0 } == ( reinterpret_cast<
-                        std::uintptr_t >( this->m_real_field_ptrs[ ii ] ) %
+                        std::uintptr_t >( this->m_real_remainder_ptrs[ ii ] ) %
                             _this_t::RealAlignment() ) );
 
                     std::copy( &this->m_real_field_ptrs[ ii ][ begin_offset ],
                                &this->m_real_field_ptrs[ ii ][ end_offset ],
-                               &this->m_real_remainder_buffer[ ii ][ 0 ] );
+                               &this->m_real_remainder_ptrs[ ii ][ 0 ] );
 
                     this->m_ptr_real_simd_fields[ ii ].load_aligned(
                         &this->m_real_remainder_ptrs[ ii ][ 0u ] );
@@ -388,12 +389,12 @@ namespace sixtrack_cxx
                                    nullptr );
 
                     SIXTRL_ASSERT( std::uintptr_t{ 0 } == ( reinterpret_cast<
-                        std::uintptr_t >( this->m_integer_field_ptrs[ ii ] ) %
-                            _this_t::IntegerAlignment() ) );
+                        std::uintptr_t >( this->m_integer_remainder_ptrs[ ii ] )
+                            % _this_t::IntegerAlignment() ) );
 
                     std::copy(
-                        &this->m_integer_remainder_ptrs[ ii ][ begin_offset ],
-                        &this->m_integer_remainder_ptrs[ ii ][ end_offset ],
+                        &this->m_integer_field_ptrs[ ii ][ begin_offset ],
+                        &this->m_integer_field_ptrs[ ii ][ end_offset ],
                         &this->m_integer_remainder_ptrs[ ii ][ 0 ] );
 
                     this->m_ptr_integer_simd_fields[ ii ].load_aligned(
@@ -718,6 +719,27 @@ namespace sixtrack_cxx
         size_type               m_num_particles;
         size_type               m_num_chunks;
         size_type               m_num_remainders;
+    };
+
+    /* --------------------------------------------------------------------- */
+
+    template< unsigned N >
+    struct ObjDataTrackTraits< XsimdTrackParticleData< N > >
+    {
+        static SIXTRL_FN constexpr
+        SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
+        {
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_PARTICLE;
+        }
+    };
+
+    template< unsigned N >
+    struct TrackParticleSetTraits< XsimdTrackParticleData< N > >
+    {
+        static SIXTRL_FN constexpr bool isParticleSetWrapper()
+        {
+            return true;
+        }
     };
 }
 
