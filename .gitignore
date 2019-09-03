@@ -1,0 +1,6 @@
+build/*
+build*/
+Settings.cmake
+
+*.kdev4
+.kdev4/*
