@@ -1,7 +1,8 @@
 #ifndef SIXTRACKLIB_COMMON_PARTICLES_TRACK_PATRICLE_CXX_HPP__
 #define SIXTRACKLIB_COMMON_PARTICLES_TRACK_PATRICLE_CXX_HPP__
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+
 #include "cxx/common/particles/track_particle_base.hpp"
 #include "cxx/common/particles/track_particle.h"
 

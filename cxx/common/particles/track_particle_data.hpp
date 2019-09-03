@@ -3,7 +3,9 @@
 
 #include <cstdlib>
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
+
 #include "cxx/common/internal/obj_store_traits.hpp"
 #include "cxx/common/internal/math_constant_traits.hpp"
 #include "cxx/common/track/obj_track_traits.hpp"

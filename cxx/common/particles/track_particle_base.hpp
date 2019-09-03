@@ -3,7 +3,9 @@
 
 #include <cstddef>
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
+
 #include "cxx/common/particles/particle_traits.hpp"
 #include "cxx/common/particles/track_particle.h"
 #include "cxx/common/particles/track_particle_data.hpp"
