@@ -20,11 +20,11 @@ if( SixTracklib_FOUND )
     message( STATUS "---- SixTracklib found" )
 endif()
 
-find_package( Clang REQUIRED )
-
-if( Clang_FOUND )
-    message( STATUS "---- Clang found : ${CLANG_CMAKE_DIR}" )
-endif()
+# find_package( Clang REQUIRED )
+#
+# if( Clang_FOUND )
+#     message( STATUS "---- Clang found : ${CLANG_CMAKE_DIR}" )
+# endif()
 
 if( SIXTRL_CXX_ENABLE_XSIMD )
     find_package( xsimd REQUIRED )
