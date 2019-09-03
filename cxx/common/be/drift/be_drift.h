@@ -1,7 +1,8 @@
 #ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_DATA_C99_H__
 #define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_DATA_C99_H__
 
-#include "sixtracklib/sixtracklib.h"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
 
 #if defined( __cplusplus )
 
@@ -56,11 +57,6 @@ namespace sixtrack_cxx
         }
     };
 
-    template<> struct BeDriftTraits< ::NS(BeDrift) >
-    {
-        typedef ::NS(be_drift_real_t)   real_t;
-    };
-
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
     template<> struct ObjDataStoreTraits< ::NS(BeDriftExact) >
@@ -84,11 +80,6 @@ namespace sixtrack_cxx
         {
             return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT;
         }
-    };
-
-    template<> struct BeDriftTraits< ::NS(BeDriftExact) >
-    {
-        typedef ::NS(be_drift_real_t)   real_t;
     };
 }
 

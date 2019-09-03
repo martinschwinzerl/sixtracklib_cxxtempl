@@ -1,7 +1,8 @@
 #ifndef SIXTRACKLIB_COMMON_BE_MULTIPOLE_BE_MULTIPOLE_C99_H__
 #define SIXTRACKLIB_COMMON_BE_MULTIPOLE_BE_MULTIPOLE_C99_H__
 
-#include "sixtracklib/sixtracklib.h"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
 
 #if defined( __cplusplus )
 

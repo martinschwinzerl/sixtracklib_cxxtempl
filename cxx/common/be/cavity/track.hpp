@@ -1,10 +1,12 @@
 #ifndef SIXTRACKLIB_COMMON_BE_CAVITY_TRACK_CXX_HPP__
 #define SIXTRACKLIB_COMMON_BE_CAVITY_TRACK_CXX_HPP__
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/track/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
 
-#include "cxx/common/be/cavity/cavity.hpp"
 #include "cxx/common/be/cavity/be_cavity_traits.hpp"
+#include "cxx/common/be/cavity/be_cavity.hpp"
 #include "cxx/common/internal/math_constant_traits.hpp"
 #include "cxx/common/internal/phys_constant_traits.hpp"
 #include "cxx/common/particles/track_particle_base.hpp"

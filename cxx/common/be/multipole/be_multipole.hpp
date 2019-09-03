@@ -17,6 +17,7 @@ namespace sixtrack_cxx
         typedef BeObjData be_data_t;
         typedef typename BeMultipoleTraits< BeObjData >::real_t  real_t;
         typedef typename BeMultipoleTraits< BeObjData >::order_t order_t;
+        typedef ::NS(BeMultipole)                                c_api_t;
 
         SIXTRL_FN BeMultipoleBase() = default;
 

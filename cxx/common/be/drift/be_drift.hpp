@@ -1,7 +1,7 @@
 #ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_CXX_HPP__
 #define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_CXX_HPP__
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
 
 #include "cxx/common/be/drift/drift_data.hpp"
 #include "cxx/common/be/drift/be_drift.h"
@@ -15,6 +15,7 @@ namespace sixtrack_cxx
 
         typedef BeObjData                                       be_data_t;
         typedef typename BeDriftTraits< BeObjData >::real_t     real_t;
+        typedef typename BeDriftTraits< BeObjData >::c_api_t    c_api_t;
 
         SIXTRL_FN BeDriftBase() = default;
 

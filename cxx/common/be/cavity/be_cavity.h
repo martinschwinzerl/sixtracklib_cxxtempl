@@ -1,7 +1,8 @@
 #ifndef SIXTRACKLIB_COMMON_BE_CAVITY_BE_CAVITY_C99_H__
 #define SIXTRACKLIB_COMMON_BE_CAVITY_BE_CAVITY_C99_H__
 
-#include "sixtracklib/sixtracklib.h"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
 
 #if defined( __cplusplus )
 
@@ -29,6 +30,17 @@ NS(BeCavity);
 
 namespace sixtrack_cxx
 {
+    void BeCavityData_init(
+        ::NS(BeCavity)& SIXTRL_RESTRICT_REF cavity,
+        ::NS(be_cavity_real_t) const voltage = ::NS(be_cavity_real_t){ 0 },
+        ::NS(be_cavity_real_t) const frequency = ::NS(be_cavity_real_t){ 0 },
+        ::NS(be_cavity_real_t) const lag = ::NS(be_cavity_real_t){ 0 } )
+    {
+        cavity.voltage   = voltage;
+        cavity.frequency = frequency;
+        cavity.lag       = lag;
+    }
+
     template<> struct ObjDataStoreTraits< ::NS(BeCavity) >
     {
         static SIXTRL_FN constexpr

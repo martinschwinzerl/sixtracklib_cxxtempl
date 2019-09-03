@@ -4,11 +4,21 @@
 #include <type_traits>
 #include <utility>
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/internal/objects_type_id.h"
+
+#include "cxx/common/be/drift/be_drift.h"
 #include "cxx/common/track/obj_track_traits.hpp"
 
 namespace sixtrack_cxx
 {
+    template< class BeObjData >
+    SIXTRL_FN constexpr bool ObjIsDrift()
+    {
+        return ( ObjDataTrackTraits< BeObjData >::ObjTypeId() ==
+                   SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT );
+    }
+
     template< class ParticleObjData, class BeObjData >
     SIXTRL_FN constexpr bool CanTrackAsDrift()
     {
@@ -23,6 +33,13 @@ namespace sixtrack_cxx
         sixtrack_cxx::CanTrackAsDrift< ParticleObjData, BeObjData >, int >;
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+    template< class BeObjData >
+    SIXTRL_FN constexpr bool ObjIsDriftExact()
+    {
+        return ( ObjDataTrackTraits< BeObjData >::ObjTypeId() ==
+                   SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT );
+    }
 
     template< class ParticleObjData, class BeObjData >
     SIXTRL_FN constexpr bool CanTrackAsDriftExact()
@@ -40,9 +57,38 @@ namespace sixtrack_cxx
     /* --------------------------------------------------------------------- */
 
     template< class BeObjData >
+    SIXTRL_FN constexpr bool ObjIsDriftOrDriftExact()
+    {
+        return ( ( ObjDataTrackTraits< BeObjData >::ObjTypeId() ==
+                        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT ) ||
+                 ( ObjDataTrackTraits< BeObjData >::ObjTypeId() ==
+                        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT ) );
+    }
+
+    /* --------------------------------------------------------------------- */
+
+    template< class BeObjData >
     struct BeDriftTraits
     {
-        typedef typename BeObjData::real_t  real_t;
+        typedef typename std::conditional<
+            sixtrack_cxx::ObjIsDrift< BeObjData >(),
+            ::NS(BeDrift), typename std::conditional<
+                sixtrack_cxx::ObjIsDriftExact< BeObjData >(),
+                    ::NS(DriftExact), void > >::type c_api_t;
+
+        typedef typename BeObjData::real_t real_t;
+    };
+
+    template<> struct BeDriftTraits< ::NS(BeDrift) >
+    {
+        typedef ::NS(BeDrift)      c_api_t;
+        typedef ::NS(be_drift_real_t)   real_t;
+    };
+
+    template<> struct BeDriftTraits< ::NS(BeDriftExact) >
+    {
+        typedef ::NS(BeDriftExact)      c_api_t;
+        typedef ::NS(be_drift_real_t)   real_t;
     };
 }
 
