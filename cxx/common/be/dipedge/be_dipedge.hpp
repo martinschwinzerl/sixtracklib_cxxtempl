@@ -18,7 +18,31 @@ namespace sixtrack_cxx
         typedef ::NS(BeDipoleEdge)  c_api_t;
         typedef typename BeDipoleEdgeTraits< BeObjData >::real_t  real_t;
 
-        SIXTRL_FN BeDipoleEdgeBase() = default;
+        /* ----------------------------------------------------------------- */
+
+        static SIXTRL_FN constexpr bool SupportsCObjectsStorage()
+        {
+            return sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer<
+                BeObjData >();
+        }
+
+        template< typename T >
+        using can_store_cobj_t = std::enable_if<
+            BeDipoleEdgeBase< BeObjData >::SupportsCObjectsStorage(), T >;
+
+        static SIXTRL_FN constexpr bool HasCApiMemoryLayout()
+        {
+            return sixtrack_cxx::ObjDataStoreTraits< BeObjData >::HasCApiLayout();
+        }
+
+        /* ----------------------------------------------------------------- */
+
+        template< typename... Args >
+        SIXTRL_FN BeDipoleEdgeBase( Args&&... args ) : BeObjData()
+        {
+            sixtrack_cxx::BeDipoleEdgeData_init(
+                this->beData(), std::forward< Args >( args )... );
+        }
 
         SIXTRL_FN BeDipoleEdgeBase(
             BeDipoleEdgeBase< BeObjData > const& other) = default;
@@ -32,9 +56,94 @@ namespace sixtrack_cxx
         SIXTRL_FN BeDipoleEdgeBase< BeObjData >& operator=(
             BeDipoleEdgeBase< BeObjData >&& other ) = default;
 
-        SIXTRL_FN virtual ~BeDipoleEdgeBase() = default;
+        SIXTRL_FN ~BeDipoleEdgeBase() = default;
 
-        protected:
+        template< typename... Args >
+        SIXTRL_FN void init( Args&&... args )
+        {
+            sixtrack_cxx::BeDipoleEdgeData_init(
+                this->beData(), std::forward< Args >( args )... );
+        }
+
+        /* ----------------------------------------------------------------- */
+
+        static SIXTRL_FN typename can_store_cobj_t< bool >::type
+        CanStoreObjectOnBuffer(
+            const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+            ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_objects = nullptr,
+            ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
+            ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
+        {
+            BeDipoleEdgeBase< BeObjData > temp;
+            return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, requ_num_objects,
+                    requ_num_slots, requ_num_dataptrs );
+        }
+
+        static SIXTRL_FN
+        typename can_store_cobj_t< BeDipoleEdgeBase< BeObjData >* >::type
+        CreateNewObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+        {
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+            _this_t temp;
+
+            return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
+                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
+        }
+
+        template< typename... Args >
+        static SIXTRL_FN
+        typename can_store_cobj_t< BeDipoleEdgeBase< BeObjData >* >::type
+        AddObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
+        {
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+            _this_t temp;
+            temp.init( std::forward< Args >( args )... );
+
+            return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
+                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
+        }
+
+        SIXTRL_FN
+        typename can_store_cobj_t< BeDipoleEdgeBase< BeObjData >* >::type
+        storeCopy( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+        {
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+            return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
+                sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
+        }
+
+        /* -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
+
+        static SIXTRL_FN
+        typename can_store_cobj_t< BeDipoleEdgeBase< BeObjData > const* >::type
+        GetConstObj( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+                ::NS(buffer_size_t) const index )
+        {
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+            return ObjStore_get_ptr_const_obj_from_info< _this_t >(
+                ::NS(Buffer_get_const_object)( buffer, index ),
+                sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
+        }
+
+        static SIXTRL_FN
+        typename can_store_cobj_t< BeDipoleEdgeBase< BeObjData >* >::type
+        GetObj( ::NS(Buffer)* SIXTRL_RESTRICT buffer,
+                ::NS(buffer_size_t) const index )
+        {
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+            return ObjStore_get_ptr_obj_from_info< _this_t >(
+                ::NS(Buffer_get_object)( buffer, index ),
+                sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
+        }
+
+        /* ----------------------------------------------------------------- */
 
         SIXTRL_FN be_data_t* ptrBeData() SIXTRL_NOEXCEPT
         {
@@ -56,6 +165,44 @@ namespace sixtrack_cxx
             return static_cast< be_data_t const& >( *this );
         }
     };
+
+    template< class DipEdgeType >
+    bool BeDipoleEdge_can_store_on_buffer(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_objects = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_slots = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_dataptrs = nullptr )
+    {
+        return DipEdgeType::CanStoreOnBuffer( buffer,
+            required_num_objects, required_num_slots, required_num_dataptrs );
+    }
+
+    template< class DipEdgeType >
+    DipEdgeType* DipoleEdge_new( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+    {
+        return DipEdgeType::CreateNewObject( buffer );
+    }
+
+    template< class DipEdgeType, typename... Args >
+    DipEdgeType* DipoleEdge_add( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
+    {
+        return DipEdgeType::AddObject( buffer, std::forward< Args >( args )... );
+    }
+
+    template< class DipEdgeType >
+    DipEdgeType const* DipoleEdge_get_const(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DipEdgeType::GetConstObj( buffer, index );
+    }
+
+    template< class DipEdgeType >
+    DipEdgeType* DipoleEdge_get( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DipEdgeType::GetObj( buffer, index );
+    }
 
     /* --------------------------------------------------------------------- */
 

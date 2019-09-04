@@ -24,6 +24,18 @@ namespace sixtrack_cxx
         real_t r43 SIXTRL_ALIGN( RAlign );
     };
 
+    template< typename R, std::size_t RAlign >
+    void BeDipoleEdgeData_init(
+        sixtrack_cxx::BeDipoleEdgeData< R, RAlign >& SIXTRL_RESTRICT_REF dipedge,
+        R const& SIXTRL_RESTRICT_REF r21 =
+            sixtrack_cxx::MathConstants< R >::Zero(),
+        R const& SIXTRL_RESTRICT_REF r43 =
+            sixtrack_cxx::MathConstants< R >::Zero() )
+    {
+        dipedge.r21 = r21;
+        dipedge.r43 = r43;
+    }
+
     /* --------------------------------------------------------------------- */
 
     template<> struct ObjDataStoreTraits< BeDipoleEdgeData< double, 8u > >
