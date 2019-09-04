@@ -2,7 +2,11 @@
 #include <iostream>
 #include <iomanip>
 
-#include "sixtracklib/sixtracklib.hpp"
+#include "sixtracklib/common/definitions.h"
+#include "sixtracklib/common/track/definitions.h"
+
+#include "cxx/boost_multiprec/definitions.hpp"
+#include "cxx/boost_multiprec/beam_elements.hpp"
 #include "cxx/sixtracklib.hpp"
 
 int main()
@@ -17,16 +21,17 @@ int main()
 
     #if defined( SIXTRL_EXT_LIBRARY_BOOST ) && ( SIXTRL_EXT_LIBRARY_BOOST == 1 )
 
-    typedef sixtrack_cxx::TBeDrift< sixtrack_cxx::mp_float_n_t< 100 > >
-            mp_drift_100_t;
+    using mp_drift_100_t = sixtrack_cxx::BeDriftBase<
+        sixtrack_cxx::BMPBeDriftData< 100 > >;
 
-    typedef sixtrack_cxx::TBeDriftExact< sixtrack_cxx::mp_float_n_t< 100 > >
-            mp_drift_exact_100_t;
+    using mp_drift_exact_100_t = sixtrack_cxx::BeDriftExactBase<
+        sixtrack_cxx::BMPBeDriftExactData< 100 > >;
 
-    mp_drift_100_t          cxx_mp_drift;
-    mp_drift_exact_100_t    cxx_mp_drift_exact;
+    using mp_particle_100_t = sixtrack_cxx::MultPrecTrackParticle< 100 >;
 
-    sixtrack_cxx::MultPrecTrackParticle< 100 > mp_particle;
+    mp_drift_100_t       mp_drift;
+    mp_drift_exact_100_t mp_drift_exact;
+    mp_particle_100_t    mp_particle;
 
     #endif /* Boost Multiprecision available */
 
@@ -53,8 +58,8 @@ int main()
 
     #if defined( SIXTRL_EXT_LIBRARY_BOOST ) && ( SIXTRL_EXT_LIBRARY_BOOST == 1 )
 
-    std::cout << "track: mp_particle, cxx_mp_drift : \r\n";
-    sixtrack_cxx::Drift_track( mp_particle, cxx_mp_drift );
+    std::cout << "track: mp_particle, mp_drift : \r\n";
+    sixtrack_cxx::Drift_track( mp_particle, mp_drift );
 
     #endif /* Boost multiprecision available */
 
@@ -80,8 +85,8 @@ int main()
 
     #if defined( SIXTRL_EXT_LIBRARY_BOOST ) && ( SIXTRL_EXT_LIBRARY_BOOST == 1 )
 
-    std::cout << "track: mp_particle, cxx_mp_drift_exact : \r\n";
-    sixtrack_cxx::DriftExact_track( mp_particle, cxx_mp_drift_exact );
+    std::cout << "track: mp_particle, mp_drift_exact : \r\n";
+    sixtrack_cxx::DriftExact_track( mp_particle, mp_drift_exact );
 
     #endif /* Boost multiprecision available */
 }
