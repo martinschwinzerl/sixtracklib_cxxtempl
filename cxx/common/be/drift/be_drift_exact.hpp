@@ -1,23 +1,23 @@
-#ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_CXX_HPP__
-#define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_CXX_HPP__
+#ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_CXX_HPP__
+#define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_CXX_HPP__
 
 #include "sixtracklib/common/definitions.h"
 
 #include "cxx/common/be/drift/be_drift_traits.hpp"
-#include "cxx/common/be/drift/be_drift_data.hpp"
-#include "cxx/common/be/drift/be_drift.h"
+#include "cxx/common/be/drift/be_drift_exact_data.hpp"
+#include "cxx/common/be/drift/be_drift_exact.h"
 
 namespace sixtrack_cxx
 {
     template< class BeObjData >
-    class BeDriftBase : public BeObjData
+    class BeDriftExactBase : public BeObjData
     {
         public:
 
         typedef BeObjData be_data_t;
-        typedef ::NS(BeDrift) c_api_t;
+        typedef ::NS(BeDriftExact) c_api_t;
 
-        typedef sixtrack_cxx::BeDriftTraits< BeObjData > be_traits_t;
+        typedef sixtrack_cxx::BeDriftExactTraits< BeObjData > be_traits_t;
         typedef typename be_traits_t::real_t real_t;
 
         static SIXTRL_FN constexpr bool SupportsCObjectsStorage()
@@ -28,7 +28,7 @@ namespace sixtrack_cxx
 
         template< typename T >
         using can_store_cobj_t = std::enable_if<
-            BeDriftBase< BeObjData >::SupportsCObjectsStorage(), T >;
+            BeDriftExactBase< BeObjData >::SupportsCObjectsStorage(), T >;
 
         static SIXTRL_FN constexpr bool HasCApiMemoryLayout()
         {
@@ -39,27 +39,30 @@ namespace sixtrack_cxx
         /* ----------------------------------------------------------------- */
 
         template< typename... Args >
-        SIXTRL_FN BeDriftBase( Args&&... args ) : BeObjData()
+        SIXTRL_FN BeDriftExactBase( Args&&... args ) : BeObjData()
         {
-            sixtrack_cxx::BeDriftData_init(
+            sixtrack_cxx::BeDriftExactData_init(
                 this->beData(), std::forward< Args >( args )... );
         }
 
-        SIXTRL_FN BeDriftBase( BeDriftBase< BeObjData > const& other) = default;
-        SIXTRL_FN BeDriftBase( BeDriftBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeDriftExactBase(
+            BeDriftExactBase< BeObjData > const& other) = default;
 
-        SIXTRL_FN BeDriftBase< BeObjData >& operator=(
-            BeDriftBase< BeObjData > const& other) = default;
+        SIXTRL_FN BeDriftExactBase(
+            BeDriftExactBase< BeObjData >&& other ) = default;
 
-        SIXTRL_FN BeDriftBase< BeObjData >& operator=(
-            BeDriftBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeDriftExactBase< BeObjData >& operator=(
+            BeDriftExactBase< BeObjData > const& other) = default;
 
-        SIXTRL_FN ~BeDriftBase() = default;
+        SIXTRL_FN BeDriftExactBase< BeObjData >& operator=(
+            BeDriftExactBase< BeObjData >&& other ) = default;
+
+        SIXTRL_FN ~BeDriftExactBase() = default;
 
         template< typename... Args >
         SIXTRL_FN void init( Args&&... args )
         {
-            sixtrack_cxx::BeDriftData_init(
+            sixtrack_cxx::BeDriftExactData_init(
                 this->beData(), std::forward< Args >( args )... );
         }
 
@@ -72,68 +75,68 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            BeDriftBase< BeObjData > temp;
+            BeDriftExactBase< BeObjData > temp;
             return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, requ_num_objects,
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT, requ_num_objects,
                     requ_num_slots, requ_num_dataptrs );
         }
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeDriftBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeDriftExactBase< BeObjData >* >::type
         CreateNewObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
-            using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
 
             _this_t temp;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         template< typename... Args >
         static SIXTRL_FN
-        typename can_store_cobj_t< BeDriftBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeDriftExactBase< BeObjData >* >::type
         AddObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
         {
-            using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
             _this_t temp( std::forward< Args >( args )... );
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
-        SIXTRL_FN typename can_store_cobj_t< BeDriftBase< BeObjData >* >::type
+        SIXTRL_FN typename can_store_cobj_t< BeDriftExactBase< BeObjData >* >::type
         storeCopy( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
-            using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT ),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         /* -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeDriftBase< BeObjData > const* >::type
+        typename can_store_cobj_t< BeDriftExactBase< BeObjData > const* >::type
         GetConstObj( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
             return ObjStore_get_ptr_const_obj_from_info< _this_t >(
                 ::NS(Buffer_get_const_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeDriftBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeDriftExactBase< BeObjData >* >::type
         GetObj( ::NS(Buffer)* SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
             return ObjStore_get_ptr_obj_from_info< _this_t >(
                 ::NS(Buffer_get_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
@@ -164,13 +167,13 @@ namespace sixtrack_cxx
 
     /* --------------------------------------------------------------------- */
 
-    typedef BeDriftBase< ::NS(BeDrift) > CBeDrift;
-    typedef BeDriftBase< BeDriftData< double > > BeDrift;
+    typedef BeDriftExactBase< ::NS(BeDriftExact) > CBeDriftExact;
+    typedef BeDriftExactBase< BeDriftExactData< double > > BeDriftExact;
 
     template< class R, std::size_t RAlign =
         sixtrack_cxx::TypeStoreTraits< R >::StorageAlign() >
-    using TBeDrift = BeDriftBase< BeDriftData< R, RAlign > >;
+    using TBeDriftExact = BeDriftExactBase< BeDriftExactData< R, RAlign > >;
 }
 
-#endif /* SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_CXX_HPP__ */
+#endif /* SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_CXX_HPP__ */
 /* end: */

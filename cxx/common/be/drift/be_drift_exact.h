@@ -1,5 +1,5 @@
-#ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_DATA_C99_H__
-#define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_DATA_C99_H__
+#ifndef SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_DATA_C99_H__
+#define SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_DATA_C99_H__
 
 #include "sixtracklib/common/definitions.h"
 #include "sixtracklib/common/internal/objects_type_id.h"
@@ -14,11 +14,11 @@
 extern "C" {
 #endif /* defined( __cplusplus ) */
 
-typedef struct NS(BeDrift)
+typedef struct NS(BeDriftExact)
 {
     NS(be_drift_real_t) length SIXTRL_ALIGN( 8 ); /* [m] */
 }
-NS(BeDrift);
+NS(BeDriftExact);
 
 #if defined( __cplusplus )
 }
@@ -27,33 +27,36 @@ NS(BeDrift);
 
 namespace sixtrack_cxx
 {
-    void BeDriftData_init( ::NS(BeDrift)& SIXTRL_RESTRICT_REF drift,
+    void BeDriftExactData_init( ::NS(BeDriftExact)& SIXTRL_RESTRICT_REF drift,
         ::NS(be_drift_real_t) const length = ::NS(be_drift_real_t){ 0 } )
     {
         drift.length = length;
     }
 
-    template<> struct ObjDataStoreTraits< ::NS(BeDrift) >
+    template<> struct ObjDataStoreTraits< ::NS(BeDriftExact) >
     {
         static SIXTRL_FN constexpr
         SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
         {
-            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT;
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT;
         }
 
-        static SIXTRL_FN constexpr bool HasCApiLayout() { return true; }
+        static SIXTRL_FN constexpr bool HasCApiLayout()
+        {
+            return true;
+        }
     };
 
-    template<> struct ObjDataTrackTraits< ::NS(BeDrift) >
+    template<> struct ObjDataTrackTraits< ::NS(BeDriftExact) >
     {
         static SIXTRL_FN constexpr
         SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
         {
-            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT;
+            return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT;
         }
     };
 
-    template<> struct BeDriftTraits< ::NS(BeDrift) >
+    template<> struct BeDriftExactTraits< ::NS(BeDriftExact) >
     {
         typedef ::NS(be_drift_real_t) real_t;
     };
@@ -61,6 +64,6 @@ namespace sixtrack_cxx
 
 #endif /* defined( __cplusplus ) */
 
-#endif /* SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_DATA_C99_H__ */
+#endif /* SIXTRACKLIB_COMMON_BE_DRIFT_BE_DRIFT_EXACT_DATA_C99_H__ */
 
-/* end: cxx/common/particles/track_particle.h */
+/* end: cxx/common/be/drift/be_drift_exact.h */

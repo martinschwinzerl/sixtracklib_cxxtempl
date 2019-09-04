@@ -3,8 +3,9 @@
 
 #include "sixtracklib/sixtracklib.hpp"
 
-#include "cxx/common/be/drift/be_drift.hpp"
 #include "cxx/common/be/drift/be_drift_traits.hpp"
+#include "cxx/common/be/drift/be_drift.hpp"
+#include "cxx/common/be/drift/be_drift_exact.hpp"
 #include "cxx/common/particles/track_particle_base.hpp"
 #include "cxx/common/track/obj_track_traits.hpp"
 
@@ -33,7 +34,7 @@ namespace sixtrack_cxx
     template< class PData, class BeData >
     typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT >::type
     DriftExact_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeDriftBase< BeData > const& SIXTRL_RESTRICT_REF drift )
+        BeDriftExactBase< BeData > const& SIXTRL_RESTRICT_REF drift )
     {
         typedef typename TrackParticleBase< PData >::real_t real_t;
         typedef typename TrackParticleBase< PData >::int_t  state_t;
