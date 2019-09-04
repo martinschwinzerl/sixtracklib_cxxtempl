@@ -1,6 +1,8 @@
 #ifndef SIXTRACKLIB_BOOST_MULTIPREC_DEFINITIONS_CXX_HPP__
 #define SIXTRACKLIB_BOOST_MULTIPREC_DEFINITIONS_CXX_HPP__
 
+#include "cxx/ext_libs.h"
+
 #if defined( SIXTRL_EXT_LIBRARY_BOOST ) && ( SIXTRL_EXT_LIBRARY_BOOST == 1 )
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
