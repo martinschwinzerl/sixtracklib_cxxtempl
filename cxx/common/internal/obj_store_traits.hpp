@@ -1,6 +1,7 @@
 #ifndef SIXTRACKLIB_COMMON_INTERNAL_OBJ_STORE_TRAITS_CXX_HPP__
 #define SIXTRACKLIB_COMMON_INTERNAL_OBJ_STORE_TRAITS_CXX_HPP__
 
+#include <algorithm>
 #include <cstdlib>
 
 #include "sixtracklib/common/definitions.h"
@@ -43,21 +44,39 @@ namespace sixtrack_cxx
     };
 
     template< class ObjData >
-    SIXTRL_FN constexpr bool ObjData_can_be_stored() SIXTRL_NOEXCEPT
+    struct ObjDataStoreConstructionTraits
     {
-        return ( sixtrack_cxx::ObjDataStoreTraits< ObjData >::ObjTypeId() !=
-                 SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_INVALID );
+        static SIXTRL_FN constexpr bool CanBeMemCopied()
+        {
+            return std::is_trivially_copyable< ObjData >::value;
+        };
+    };
+
+    template< class ObjData >
+    SIXTRL_FN constexpr bool
+    ObjData_can_be_stored_on_cobjects_buffer() SIXTRL_NOEXCEPT
+    {
+        typedef sixtrack_cxx::ObjDataStoreTraits< ObjData >
+                _store_traits_t;
+
+        typedef sixtrack_cxx::ObjDataStoreConstructionTraits< ObjData >
+                _construction_traits_t;
+
+        return ( ( std::is_standard_layout< ObjData >::value ) &&
+                 ( _store_traits_t::ObjTypeId() !=
+                     SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_INVALID ) &&
+                 ( _construction_traits_t::CanBeMemCopied() ) );
     }
 
     template< class ObjData >
-    SIXTRL_FN bool ObjData_can_be_stored(
+    SIXTRL_FN bool ObjData_can_be_stored_on_cobjects_buffer(
         const ::NS(Buffer) *const SIXTRL_RESTRICT buffer )
     {
         typedef ::NS(buffer_size_t) size_type;
 
         size_type const slot_size = ::NS(Buffer_get_slot_size)( buffer );
 
-        return ( ( sixtrack_cxx::ObjData_can_be_stored< ObjData >() ) &&
+        return ( ( sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer< ObjData >() ) &&
                  ( buffer != nullptr ) && ( slot_size > size_type{ 0 } ) &&
                  ( ( slot_size == size_type { 1 } ) ||
                    ( ( slot_size <= alignof( ObjData ) ) &&
@@ -226,7 +245,8 @@ namespace sixtrack_cxx
         status_t status = st::ARCH_STATUS_GENERAL_FAILURE;
         obj_type_id_t obj_type_id = st::OBJECT_TYPE_INVALID;
 
-        if( sixtrack_cxx::ObjData_can_be_stored< ObjData >( buffer ) )
+        if( sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer< ObjData >(
+                buffer ) )
         {
             status = sixtrack_cxx::ObjDataStore_get_dataptr_counts(
                 obj_data, dataptrs_counts_begin, dataptrs_counts_end );
@@ -241,6 +261,11 @@ namespace sixtrack_cxx
               ( expected_base_object_type_id ==
                 sixtrack_cxx::ObjectTypeId_get_base_type_id( obj_type_id ) ) ) )
         {
+            static_assert( std::is_standard_layout< ObjData >::value,
+                "Can only store ObjData classes which satisfy the "
+                "std::is_standard_layout<> type trait; "
+                "this type does not conform" );
+
             if( native_size == size_t{ 0 } ) native_size = sizeof( obj_data );
             can_be_stored = ::NS(Buffer_can_add_object)( buffer, native_size,
                 obj_traits_t::GetNumDataPtrs(), obj_traits_t::GetPtrSizesBegin(),
@@ -252,7 +277,7 @@ namespace sixtrack_cxx
     }
 
     template< class ObjData >
-    static SIXTRL_FN ::NS(Object) Obj_store_on_buffer(
+    static SIXTRL_FN ::NS(Object)* Obj_store_on_buffer(
         ::NS(Buffer)* SIXTRL_RESTRICT buffer,
         ObjData const& SIXTRL_RESTRICT_REF obj_data,
         ::NS(object_type_id_t) const expected_base_object_type_id
@@ -262,9 +287,7 @@ namespace sixtrack_cxx
         ::NS(buffer_size_t)* SIXTRL_RESTRICT dataptrs_counts_end = nullptr )
     {
         namespace st = SIXTRL_CXX_NAMESPACE;
-
-        ::NS(Object) obj_info;
-        ::NS(Object_preset)( &obj_info );
+        ::NS(Object)* ptr_obj_info = nullptr;
 
         typedef ::NS(buffer_size_t) size_t;
         typedef ::NS(arch_status_t) status_t;
@@ -274,7 +297,8 @@ namespace sixtrack_cxx
         status_t status = st::ARCH_STATUS_GENERAL_FAILURE;
         obj_type_id_t obj_type_id = st::OBJECT_TYPE_INVALID;
 
-        if( sixtrack_cxx::ObjData_can_be_stored< ObjData >( buffer ) )
+        if( sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer< ObjData >(
+                buffer ) )
         {
             status = sixtrack_cxx::ObjDataStore_get_dataptr_counts(
                 obj_data, dataptrs_counts_begin, dataptrs_counts_end );
@@ -289,17 +313,49 @@ namespace sixtrack_cxx
               ( expected_base_object_type_id ==
                 sixtrack_cxx::ObjectTypeId_get_base_type_id( obj_type_id ) ) ) )
         {
+            static_assert( std::is_standard_layout< ObjData >::value,
+                "Can only store ObjData classes which satisfy the "
+                "std::is_standard_layout<> type trait; "
+                "this type does not conform" );
+
             if( native_size == size_t{ 0 } ) native_size = sizeof( obj_data );
-            obj_info = ::NS(Buffer_add_object)( buffer, &obj_data, native_size,
-                obj_type_id, obj_traits_t::GetNumDataPtrs(),
+            ptr_obj_info = ::NS(Buffer_add_object)( buffer, &obj_data,
+                native_size, obj_type_id, obj_traits_t::GetNumDataPtrs(),
                     obj_traits_t::GetPtrOffsetsBegin(),
                         obj_traits_t::GetPtrSizesBegin(),
                             dataptrs_counts_begin );
         }
 
-        return obj_info;
+        return ptr_obj_info;
     }
 
+    template< class RestoreObj >
+    SIXTRL_FN RestoreObj const* ObjStore_get_ptr_const_obj_from_info(
+        const ::NS(Object) *const SIXTRL_RESTRICT ptr_obj_info,
+        ::NS(object_type_id_t) const expected_obj_type_id )
+    {
+        ::NS(object_type_id_t) const obj_type_id =
+            ::NS(Object_get_type_id)( ptr_obj_info );
+
+        if( ( obj_type_id == expected_obj_type_id ) &&
+            ( obj_type_id != SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_INVALID ) )
+        {
+            return reinterpret_cast< RestoreObj const* >(
+                ::NS(Object_get_begin_addr)( ptr_obj_info ) );
+        }
+
+        return nullptr;
+    }
+
+    template< class RestoreObj >
+    SIXTRL_FN RestoreObj* ObjStore_get_ptr_obj_from_info(
+        ::NS(Object)* SIXTRL_RESTRICT ptr_obj_info,
+        ::NS(object_type_id_t) const expected_obj_type_id )
+    {
+        return const_cast< RestoreObj* >(
+            ObjStore_get_ptr_const_obj_from_info< RestoreObj >(
+                ptr_obj_info, expected_obj_type_id ) );
+    }
 }
 
 #endif /* SIXTRACKLIB_COMMON_INTERNAL_OBJ_STORE_TRAITS_CXX_HPP__ */

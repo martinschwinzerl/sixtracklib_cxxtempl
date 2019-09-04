@@ -44,7 +44,7 @@ namespace sixtrack_cxx
     /* --------------------------------------------------------------------- */
 
     template<>
-    struct ObjDataStoreTraits< BeCavityData< double, 8u  > >
+    struct ObjDataStoreTraits< BeCavityData< double > >
     {
         static SIXTRL_FN constexpr
         SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
