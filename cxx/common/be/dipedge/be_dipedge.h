@@ -25,18 +25,8 @@ NS(BeDipoleEdge);
 #if defined( __cplusplus )
 }
 
-/* ------------------------------------------------------------------------- */
-
 namespace sixtrack_cxx
 {
-    void BeDipoleEdgeData_init( ::NS(BeDipoleEdge)& SIXTRL_RESTRICT_REF dipedge,
-        ::NS(be_dipedge_real_t) const r21 = ::NS(be_dipedge_real_t){ 0.0 },
-        ::NS(be_dipedge_real_t) const r43 = ::NS(be_dipedge_real_t){ 0.0 } )
-    {
-        dipedge.r21 = r21;
-        dipedge.r43 = r43;
-    }
-
     template<> struct ObjDataStoreTraits< ::NS(BeDipoleEdge) >
     {
         static SIXTRL_FN constexpr

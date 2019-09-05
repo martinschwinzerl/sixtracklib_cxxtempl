@@ -39,38 +39,6 @@ namespace sixtrack_cxx
             ( BeMultipoleData< R, RAlign, OAlign >::BalParamAlignment() ) );
     };
 
-    template< typename R, std::size_t RAlign, std::size_t OAlign >
-    typename BeMultipoleData< R, RAlign, OAlign >::order_t
-    BeMultipoleData_get_order( BeMultipoleData< R, RAlign, OAlign >
-        const& SIXTRL_RESTRICT_REF mp ) SIXTRL_NOEXCEPT
-    {
-        return mp.order;
-    }
-
-    template< typename R, std::size_t RAlign, std::size_t OAlign >
-    typename BeMultipoleData< R, RAlign, OAlign >::real_t const&
-    BeMultipoleData_get_const_bal(
-        BeMultipoleData< R, RAlign, OAlign > const& SIXTRL_RESTRICT_REF mp,
-        ::NS(multipole_order_t) const order_index ) SIXTRL_NOEXCEPT
-    {
-        SIXTRL_ASSERT( mp.bal != nullptr );
-        SIXTRL_ASSERT( mp.order > order_index );
-
-        return mp.bal[ order_index ];
-    }
-
-    template< typename R, std::size_t RAlign, std::size_t OAlign >
-    typename BeMultipoleData< R, RAlign, OAlign >::real_t&
-    BeMultipoleData_get_bal(
-        BeMultipoleData< R, RAlign, OAlign >& SIXTRL_RESTRICT_REF mp,
-        ::NS(multipole_order_t) const order_index ) SIXTRL_NOEXCEPT
-    {
-        SIXTRL_ASSERT( mp.bal != nullptr );
-        SIXTRL_ASSERT( mp.order > order_index );
-
-        return mp.bal[ order_index ];
-    }
-
     /* --------------------------------------------------------------------- */
 
     template<>
@@ -95,6 +63,68 @@ namespace sixtrack_cxx
         SIXTRL_CXX_NAMESPACE::object_type_id_t ObjTypeId()
         {
             return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE;
+        }
+    };
+
+    template< class R, std::size_t RAlign, std::size_t OAlign >
+    struct ObjDataStoreLayoutTraits<
+        sixtrack_cxx::BeMultipoleData< R, RAlign, OAlign > >
+    {
+        typedef sixtrack_cxx::BeMultipoleData< R, RAlign, OAlign > _obj_data_t;
+        typedef sixtrack_cxx::ObjDataStoreLayoutTraits< _obj_data_t >
+                _obj_data_store_layout_traits_t;
+
+        typedef ::NS(buffer_size_t) size_type;
+
+        static constexpr size_type DataPtrSizes[ 1 ]   = { sizeof( R ) };
+        static constexpr size_type DataPtrOffsets[ 1 ] =
+        {
+            offsetof( _obj_data_t, bal )
+        };
+
+        static SIXTRL_FN constexpr size_type GetNumDataPtrs()
+        {
+            return ::NS(buffer_size_t){ 1 };
+        }
+
+        static SIXTRL_FN size_type const* GetPtrSizesBegin()
+        {
+            return &_obj_data_store_layout_traits_t::DataPtrSizes[ 0 ];
+        }
+
+        static SIXTRL_FN size_type const* GetPtrOffsetsBegin()
+        {
+            return &_obj_data_store_layout_traits_t::DataPtrOffsets[ 0 ];
+        }
+
+        static SIXTRL_FN SIXTRL_CXX_NAMESPACE::arch_status_t GetDataPtrsCounts(
+            _obj_data_t const& SIXTRL_RESTRICT_REF obj,
+            size_type* SIXTRL_RESTRICT counts_begin,
+            size_type* SIXTRL_RESTRICT counts_end )
+        {
+            typedef typename _obj_data_t::order_t order_t;
+            typedef std::ptrdiff_t diff_t;
+            namespace st = SIXTRL_CXX_NAMESPACE;
+
+            st::arch_status_t status = st::ARCH_STATUS_GENERAL_FAILURE;
+            diff_t in_length = diff_t{ 0 };
+
+            if( ( counts_begin != nullptr ) && ( counts_end != nullptr ) )
+            {
+                in_length = std::distance( counts_begin, counts_end );
+            }
+
+            order_t const order = obj->order;
+
+            if( ( in_length > diff_t{ 0 } ) && ( order >= order_t{ 0 } ) )
+            {
+                *counts_begin = static_cast< size_type >(
+                    order_t{ 2 } * ( order + order_t{ 1 } ) );
+
+                status = st::ARCH_STATUS_SUCCESS;
+            }
+
+            return status;
         }
     };
 }

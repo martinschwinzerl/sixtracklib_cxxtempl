@@ -14,9 +14,9 @@ namespace sixtrack_cxx
     {
         public:
 
-        typedef BeObjData           be_data_t;
-        typedef ::NS(BeDipoleEdge)  c_api_t;
-        typedef typename BeDipoleEdgeTraits< BeObjData >::real_t  real_t;
+        typedef BeObjData be_data_t;
+        typedef ::NS(BeDipoleEdge) c_api_t;
+        typedef typename BeDipoleEdgeTraits< BeObjData >::real_t real_t;
 
         /* ----------------------------------------------------------------- */
 
@@ -37,11 +37,18 @@ namespace sixtrack_cxx
 
         /* ----------------------------------------------------------------- */
 
-        template< typename... Args >
-        SIXTRL_FN BeDipoleEdgeBase( Args&&... args ) : BeObjData()
+        SIXTRL_FN BeDipoleEdgeBase() : BeObjData()
         {
-            sixtrack_cxx::BeDipoleEdgeData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->r21 = real_t{ 0.0 };
+            this->r43 = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN BeDipoleEdgeBase(
+            real_t const& SIXTRL_RESTRICT_REF _r21,
+            real_t const& SIXTRL_RESTRICT_REF _r43 ) : BeObjData()
+        {
+            this->r21 = _r21;
+            this->r43 = _r43;
         }
 
         SIXTRL_FN BeDipoleEdgeBase(
@@ -58,11 +65,18 @@ namespace sixtrack_cxx
 
         SIXTRL_FN ~BeDipoleEdgeBase() = default;
 
-        template< typename... Args >
-        SIXTRL_FN void init( Args&&... args )
+        SIXTRL_FN void init()
         {
-            sixtrack_cxx::BeDipoleEdgeData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->r21 = real_t{ 0.0 };
+            this->r43 = real_t{ 0.0 };
+        }
+
+
+        SIXTRL_FN void init( real_t const& SIXTRL_RESTRICT_REF _r21,
+                             real_t const& SIXTRL_RESTRICT_REF _r43 )
+        {
+            this->r21 = _r21;
+            this->r43 = _r43;
         }
 
         /* ----------------------------------------------------------------- */
@@ -74,10 +88,13 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            BeDipoleEdgeBase< BeObjData > temp;
+            using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
+
+            _this_t temp;
             return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, requ_num_objects,
-                    requ_num_slots, requ_num_dataptrs );
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE, sizeof( _this_t ),
+                    nullptr, nullptr, requ_num_objects, requ_num_slots,
+                        requ_num_dataptrs );
         }
 
         static SIXTRL_FN
@@ -89,7 +106,7 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -104,7 +121,7 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -115,7 +132,7 @@ namespace sixtrack_cxx
             using _this_t = sixtrack_cxx::BeDipoleEdgeBase< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 

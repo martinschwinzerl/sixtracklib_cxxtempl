@@ -24,8 +24,6 @@ namespace sixtrack_cxx
         real_t a_b_squ SIXTRL_ALIGN( RAlign );
     };
 
-    /* --------------------------------------------------------------------- */
-
     template<> struct ObjDataStoreTraits< BeLimitEllipseData< double, 8u > >
     {
         static SIXTRL_FN constexpr

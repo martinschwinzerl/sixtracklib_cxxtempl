@@ -5,6 +5,7 @@
 
 #include "sixtracklib/sixtracklib.hpp"
 #include "cxx/common/be/srotation/be_srotation_traits.hpp"
+#include "cxx/common/internal/math_constant_traits.hpp"
 #include "cxx/common/internal/obj_store_traits.hpp"
 #include "cxx/common/track/obj_track_traits.hpp"
 
@@ -22,8 +23,6 @@ namespace sixtrack_cxx
         real_t  cos_z SIXTRL_ALIGN( RAlign );
         real_t  sin_z SIXTRL_ALIGN( RAlign );
     };
-
-    /* --------------------------------------------------------------------- */
 
     template<> struct ObjDataStoreTraits< BeSRotationData< double, 8u > >
     {

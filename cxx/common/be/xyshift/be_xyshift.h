@@ -13,19 +13,17 @@
 extern "C" {
 #endif /* defined( __cplusplus ) */
 
-typedef double  NS(be_xyshift_real_t);
+typedef double NS(be_xyshift_real_t);
 
 typedef struct NS(BeXYShift)
 {
-    NS(be_xyshift_real_t)  dx          SIXTRL_ALIGN( 8 );
-    NS(be_xyshift_real_t)  dy          SIXTRL_ALIGN( 8 );
+    NS(be_xyshift_real_t) dx SIXTRL_ALIGN( 8 );
+    NS(be_xyshift_real_t) dy SIXTRL_ALIGN( 8 );
 }
 NS(BeXYShift);
 
 #if defined( __cplusplus )
 }
-
-/* ------------------------------------------------------------------------- */
 
 namespace sixtrack_cxx
 {
@@ -54,7 +52,7 @@ namespace sixtrack_cxx
 
     template<> struct BeXYShiftTraits< ::NS(BeXYShift) >
     {
-        typedef ::NS(be_xyshift_real_t)   real_t;
+        typedef ::NS(be_xyshift_real_t) real_t;
     };
 }
 

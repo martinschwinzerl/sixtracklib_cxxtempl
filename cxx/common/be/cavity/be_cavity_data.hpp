@@ -26,23 +26,6 @@ namespace sixtrack_cxx
         real_t  lag         SIXTRL_ALIGN( RAlign );
     };
 
-    template< typename R, std::size_t RAlign >
-    void BeCavityData_init(
-        sixtrack_cxx::BeCavityData< R, RAlign >& SIXTRL_RESTRICT_REF cavity,
-        R const& SIXTRL_RESTRICT_REF voltage =
-            sixtrack_cxx::MathConstants< R >::Zero(),
-        R const& SIXTRL_RESTRICT_REF frequency =
-            sixtrack_cxx::MathConstants< R >::Zero(),
-        R const& SIXTRL_RESTRICT_REF lag =
-            sixtrack_cxx::MathConstants< R >::Zero() )
-    {
-        cavity.voltage   = voltage;
-        cavity.frequency = frequency;
-        cavity.lag       = lag;
-    }
-
-    /* --------------------------------------------------------------------- */
-
     template<>
     struct ObjDataStoreTraits< BeCavityData< double > >
     {

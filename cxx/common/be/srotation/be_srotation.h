@@ -18,15 +18,13 @@ typedef double  NS(be_srotation_real_t);
 
 typedef struct NS(BeSRotation)
 {
-    NS(be_srotation_real_t)  cos_z SIXTRL_ALIGN( 8 );
-    NS(be_srotation_real_t)  sin_z SIXTRL_ALIGN( 8 );
+    NS(be_srotation_real_t) cos_z SIXTRL_ALIGN( 8 );
+    NS(be_srotation_real_t) sin_z SIXTRL_ALIGN( 8 );
 }
 NS(BeSRotation);
 
 #if defined( __cplusplus )
 }
-
-/* ------------------------------------------------------------------------- */
 
 namespace sixtrack_cxx
 {
@@ -55,7 +53,7 @@ namespace sixtrack_cxx
 
     template<> struct BeSRotationTraits< ::NS(BeSRotation) >
     {
-        typedef ::NS(be_srotation_real_t)   real_t;
+        typedef ::NS(be_srotation_real_t) real_t;
     };
 }
 

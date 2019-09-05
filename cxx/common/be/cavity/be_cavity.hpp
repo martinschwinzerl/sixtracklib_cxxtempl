@@ -17,16 +17,15 @@ namespace sixtrack_cxx
     {
         public:
 
-        typedef BeObjData       be_data_t;
-        typedef ::NS(BeCavity)  c_api_t;
-
-        typedef typename BeCavityTraits< BeObjData >::real_t  real_t;
+        typedef BeObjData be_data_t;
+        typedef ::NS(BeCavity) c_api_t;
+        typedef sixtrack_cxx::BeCavityTraits< BeObjData >   cavity_traits_t;
+        typedef typename cavity_traits_t::real_t real_t;
 
         static SIXTRL_FN constexpr bool SupportsCObjectsStorage()
         {
             return sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer<
                 BeObjData >();
-
         }
 
         template< typename T >
@@ -40,11 +39,20 @@ namespace sixtrack_cxx
 
         /* ----------------------------------------------------------------- */
 
-        template< typename... Args >
-        SIXTRL_FN explicit BeCavityBase( Args&&... args ) : BeObjData()
+        SIXTRL_FN BeCavityBase() : BeObjData()
         {
-            sixtrack_cxx::BeCavityData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->voltage   = real_t{ 0.0 };
+            this->frequency = real_t{ 0.0 };
+            this->lag       = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN BeCavityBase( real_t const& SIXTRL_RESTRICT_REF _voltage,
+            real_t const& SIXTRL_RESTRICT_REF _frequency,
+            real_t const& SIXTRL_RESTRICT_REF _lag ) : BeObjData()
+        {
+            this->voltage   = _voltage;
+            this->frequency = _frequency;
+            this->lag       = _lag;
         }
 
         SIXTRL_FN BeCavityBase(
@@ -59,14 +67,23 @@ namespace sixtrack_cxx
         SIXTRL_FN BeCavityBase< BeObjData >& operator=(
             BeCavityBase< BeObjData >&& other ) = default;
 
-
         SIXTRL_FN ~BeCavityBase() = default;
 
-        template< typename... Args >
-        SIXTRL_FN void init( Args&&... args )
+        SIXTRL_FN void init()
         {
-            sixtrack_cxx::BeCavityData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->voltage   = real_t{ 0.0 };
+            this->frequency = real_t{ 0.0 };
+            this->lag       = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN void init(
+            real_t const& SIXTRL_RESTRICT_REF _voltage,
+            real_t const& SIXTRL_RESTRICT_REF _frequency,
+            real_t const& SIXTRL_RESTRICT_REF _lag )
+        {
+            this->voltage   = _voltage;
+            this->frequency = _frequency;
+            this->lag       = _lag;
         }
 
         /* ----------------------------------------------------------------- */
@@ -78,10 +95,13 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            BeCavityBase< BeObjData > temp;
+            using _this_t = sixtrack_cxx::BeCavityBase< BeObjData >;
+            _this_t temp;
+
             return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, requ_num_objects,
-                    requ_num_slots, requ_num_dataptrs );
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, sizeof( _this_t ),
+                    nullptr, nullptr, requ_num_objects, requ_num_slots,
+                        requ_num_dataptrs );
         }
 
         static SIXTRL_FN
@@ -93,7 +113,7 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -108,7 +128,7 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -118,7 +138,7 @@ namespace sixtrack_cxx
             using _this_t = sixtrack_cxx::BeCavityBase< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY ),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 

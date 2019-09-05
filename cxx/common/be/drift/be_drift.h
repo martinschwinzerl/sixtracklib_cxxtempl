@@ -23,16 +23,8 @@ NS(BeDrift);
 #if defined( __cplusplus )
 }
 
-/* ------------------------------------------------------------------------- */
-
 namespace sixtrack_cxx
 {
-    void BeDriftData_init( ::NS(BeDrift)& SIXTRL_RESTRICT_REF drift,
-        ::NS(be_drift_real_t) const length = ::NS(be_drift_real_t){ 0 } )
-    {
-        drift.length = length;
-    }
-
     template<> struct ObjDataStoreTraits< ::NS(BeDrift) >
     {
         static SIXTRL_FN constexpr

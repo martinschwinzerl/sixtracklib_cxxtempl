@@ -6,8 +6,8 @@ namespace sixtrack_cxx
     template< class BeObjData >
     struct BeMultipoleTraits
     {
-        typedef typename BeObjData::real_t      real_t;
-        typedef typename BeObjData::order_t     order_t;
+        typedef typename BeObjData::real_t real_t;
+        typedef typename BeObjData::order_t order_t;
     };
 }
 

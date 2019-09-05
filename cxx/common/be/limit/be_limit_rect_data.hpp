@@ -26,8 +26,6 @@ namespace sixtrack_cxx
         real_t max_y SIXTRL_ALIGN( RAlign );
     };
 
-    /* --------------------------------------------------------------------- */
-
     template<> struct ObjDataStoreTraits< BeLimitRectData< double, 8u > >
     {
         static SIXTRL_FN constexpr
@@ -55,3 +53,4 @@ namespace sixtrack_cxx
 
 #endif /* SIXTRACKLIB_COMMON_BE_LIMIT_RECT_BE_LIMIT_RECT_DATA_CXX_HPP__ */
 /* end: */
+

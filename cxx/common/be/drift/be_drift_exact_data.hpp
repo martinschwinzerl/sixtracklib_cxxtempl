@@ -24,23 +24,6 @@ namespace sixtrack_cxx
         real_t length SIXTRL_ALIGN( RAlign );
     };
 
-    template< class R, std::size_t RAlign >
-    void BeDriftExactData_init(
-        BeDriftExactData< R, RAlign >& SIXTRL_RESTRICT_REF drift )
-    {
-        drift.length = typename BeDriftExactData< R, RAlign >::real_t{ 0 };
-    }
-
-    template< class R, std::size_t RAlign >
-    void BeDriftExactData_init(
-        BeDriftExactData< R, RAlign >& SIXTRL_RESTRICT_REF drift,
-        typename BeDriftExactData< R, RAlign >::real_t const& length )
-    {
-        drift.length = length;
-    }
-
-    /* --------------------------------------------------------------------- */
-
     template<> struct ObjDataStoreTraits< BeDriftExactData< double > >
     {
         static SIXTRL_FN constexpr

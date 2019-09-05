@@ -38,11 +38,15 @@ namespace sixtrack_cxx
 
         /* ----------------------------------------------------------------- */
 
-        template< typename... Args >
-        SIXTRL_FN BeDriftBase( Args&&... args ) : BeObjData()
+        SIXTRL_FN BeDriftBase() : BeObjData()
         {
-            sixtrack_cxx::BeDriftData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->length = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN BeDriftBase( real_t const& SIXTRL_RESTRICT_REF length ) :
+            BeObjData()
+        {
+            this->length = length;
         }
 
         SIXTRL_FN BeDriftBase( BeDriftBase< BeObjData > const& other) = default;
@@ -56,11 +60,14 @@ namespace sixtrack_cxx
 
         SIXTRL_FN ~BeDriftBase() = default;
 
-        template< typename... Args >
-        SIXTRL_FN void init( Args&&... args )
+        SIXTRL_FN void init()
         {
-            sixtrack_cxx::BeDriftData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->length = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN void init( real_t const& SIXTRL_RESTRICT_REF length )
+        {
+            this->length = length;
         }
 
         /* ----------------------------------------------------------------- */
@@ -72,10 +79,13 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            BeDriftBase< BeObjData > temp;
+            typedef sixtrack_cxx::BeDriftBase< BeObjData > _this_t;
+            _this_t temp;
+
             return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, requ_num_objects,
-                    requ_num_slots, requ_num_dataptrs );
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, sizeof( _this_t ),
+                    nullptr, nullptr, requ_num_objects, requ_num_slots,
+                        requ_num_dataptrs );
         }
 
         static SIXTRL_FN
@@ -83,11 +93,11 @@ namespace sixtrack_cxx
         CreateNewObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
             using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
-
             _this_t temp;
+
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT),
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -101,7 +111,7 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -111,7 +121,7 @@ namespace sixtrack_cxx
             using _this_t = sixtrack_cxx::BeDriftBase< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT ),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT, sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -161,6 +171,44 @@ namespace sixtrack_cxx
             return static_cast< be_data_t const& >( *this );
         }
     };
+
+    template< class DriftType >
+    bool Drift_can_store_on_buffer(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_objects = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_slots = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_dataptrs = nullptr )
+    {
+        return DriftType::CanStoreOnBuffer( buffer,
+            required_num_objects, required_num_slots, required_num_dataptrs );
+    }
+
+    template< class DriftType >
+    DriftType* Drift_new( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+    {
+        return DriftType::CreateNewObject( buffer );
+    }
+
+    template< class DriftType, typename... Args >
+    DriftType* Drift_add( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
+    {
+        return DriftType::AddObject( buffer, std::forward< Args >( args )... );
+    }
+
+    template< class DriftType >
+    DriftType const* Drift_get_const(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DriftType::GetConstObj( buffer, index );
+    }
+
+    template< class DriftType >
+    DriftType* Drift_get( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DriftType::GetObj( buffer, index );
+    }
 
     /* --------------------------------------------------------------------- */
 

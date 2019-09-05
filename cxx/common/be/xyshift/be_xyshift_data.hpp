@@ -21,11 +21,9 @@ namespace sixtrack_cxx
         static SIXTRL_FN constexpr std::size_t
         RealAlignment() { return RAlign; }
 
-        real_t  dx          SIXTRL_ALIGN( RAlign );
-        real_t  dy          SIXTRL_ALIGN( RAlign );
+        real_t dx SIXTRL_ALIGN( RAlign );
+        real_t dy SIXTRL_ALIGN( RAlign );
     };
-
-    /* --------------------------------------------------------------------- */
 
     template<> struct ObjDataStoreTraits< BeXYShiftData< double, 8u > >
     {

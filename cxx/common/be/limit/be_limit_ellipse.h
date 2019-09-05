@@ -26,8 +26,6 @@ NS(BeLimitEllipse);
 #if defined( __cplusplus )
 }
 
-/* ------------------------------------------------------------------------- */
-
 namespace sixtrack_cxx
 {
     template<> struct ObjDataStoreTraits< ::NS(BeLimitEllipse) >
@@ -38,10 +36,7 @@ namespace sixtrack_cxx
             return SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_ELLIPSE;
         }
 
-        static SIXTRL_FN constexpr bool HasCApiLayout()
-        {
-            return true;
-        }
+        static SIXTRL_FN constexpr bool HasCApiLayout() { return true; }
     };
 
     template<> struct ObjDataTrackTraits< ::NS(BeLimitEllipse) >
@@ -55,7 +50,7 @@ namespace sixtrack_cxx
 
     template<> struct BeLimitEllipseTraits< ::NS(BeLimitEllipse) >
     {
-        typedef ::NS(be_limit_ellipse_real_t)   real_t;
+        typedef ::NS(be_limit_ellipse_real_t) real_t;
     };
 }
 

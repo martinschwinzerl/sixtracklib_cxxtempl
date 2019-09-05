@@ -38,11 +38,15 @@ namespace sixtrack_cxx
 
         /* ----------------------------------------------------------------- */
 
-        template< typename... Args >
-        SIXTRL_FN BeDriftExactBase( Args&&... args ) : BeObjData()
+        SIXTRL_FN BeDriftExactBase() : BeObjData()
         {
-            sixtrack_cxx::BeDriftExactData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->length = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN explicit BeDriftExactBase(
+            real_t const& SIXTRL_RESTRICT_REF length ) : BeObjData()
+        {
+            this->length = length;
         }
 
         SIXTRL_FN BeDriftExactBase(
@@ -59,11 +63,14 @@ namespace sixtrack_cxx
 
         SIXTRL_FN ~BeDriftExactBase() = default;
 
-        template< typename... Args >
-        SIXTRL_FN void init( Args&&... args )
+        SIXTRL_FN void init()
         {
-            sixtrack_cxx::BeDriftExactData_init(
-                this->beData(), std::forward< Args >( args )... );
+            this->length = real_t{ 0.0 };
+        }
+
+        SIXTRL_FN void init( real_t const& SIXTRL_RESTRICT_REF length )
+        {
+            this->length = length;
         }
 
         /* ----------------------------------------------------------------- */
@@ -75,10 +82,12 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            BeDriftExactBase< BeObjData > temp;
+            using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
+            _this_t temp;
             return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT, requ_num_objects,
-                    requ_num_slots, requ_num_dataptrs );
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT,
+                    sizeof( _this_t ), nullptr, nullptr, requ_num_objects,
+                        requ_num_slots, requ_num_dataptrs );
         }
 
         static SIXTRL_FN
@@ -90,7 +99,8 @@ namespace sixtrack_cxx
             _this_t temp;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT,
+                        sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -104,7 +114,8 @@ namespace sixtrack_cxx
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT,
+                        sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -114,7 +125,8 @@ namespace sixtrack_cxx
             using _this_t = sixtrack_cxx::BeDriftExactBase< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
                 sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT ),
+                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT,
+                        sizeof( _this_t ) ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
@@ -164,6 +176,45 @@ namespace sixtrack_cxx
             return static_cast< be_data_t const& >( *this );
         }
     };
+
+    template< class DriftExactType >
+    bool DriftExact_can_store_on_buffer(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_objects = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_slots = nullptr,
+        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_dataptrs = nullptr )
+    {
+        return DriftExactType::CanStoreOnBuffer( buffer,
+            required_num_objects, required_num_slots, required_num_dataptrs );
+    }
+
+    template< class DriftExactType > DriftExactType* DriftExact_new(
+        ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+    {
+        return DriftExactType::CreateNewObject( buffer );
+    }
+
+    template< class DriftExactType, typename... Args >
+    DriftExactType* DriftExact_add(
+        ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
+    {
+        return DriftExactType::AddObject(
+            buffer, std::forward< Args >( args )... );
+    }
+
+    template< class DriftExactType > DriftExactType const* DriftExact_get_const(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DriftExactType::GetConstObj( buffer, index );
+    }
+
+    template< class DriftExactType > DriftExactType* DriftExact_get(
+        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
+        ::NS(buffer_size_t) const index )
+    {
+        return DriftExactType::GetObj( buffer, index );
+    }
 
     /* --------------------------------------------------------------------- */
 
