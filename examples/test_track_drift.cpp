@@ -21,10 +21,10 @@ int main()
 
     #if defined( SIXTRL_EXT_LIBRARY_BOOST ) && ( SIXTRL_EXT_LIBRARY_BOOST == 1 )
 
-    using mp_drift_100_t = sixtrack_cxx::BeDriftBase<
+    using mp_drift_100_t = sixtrack_cxx::BeDriftInterface<
         sixtrack_cxx::BMPBeDriftData< 100 > >;
 
-    using mp_drift_exact_100_t = sixtrack_cxx::BeDriftExactBase<
+    using mp_drift_exact_100_t = sixtrack_cxx::BeDriftExactInterface<
         sixtrack_cxx::BMPBeDriftExactData< 100 > >;
 
     using mp_particle_100_t = sixtrack_cxx::MultPrecTrackParticle< 100 >;

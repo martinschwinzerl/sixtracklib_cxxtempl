@@ -174,13 +174,13 @@ int main()
               << std::setw( 12 ) << ptr_c99_cavity_2->lag
               << "\r\n" << std::endl;
 
-    using mp_cavity_100_t = sixtrack_cxx::BeCavityBase<
+    using mp_cavity_100_t = sixtrack_cxx::BeCavityInterface<
         sixtrack_cxx::BMPBeCavityData< 100 > >;
 
     mp_cavity_100_t mp_cavity_a;
     mp_cavity_a.init();
 
-    using mp_cavity_200_t = sixtrack_cxx::BeCavityBase<
+    using mp_cavity_200_t = sixtrack_cxx::BeCavityInterface<
         sixtrack_cxx::BMPBeCavityData< 200 > >;
 
     mp_cavity_200_t mp_cavity_b( 1e6, 400e6, 0.5 );
