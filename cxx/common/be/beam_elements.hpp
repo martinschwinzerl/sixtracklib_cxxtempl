@@ -2,6 +2,7 @@
 #define SIXTRACKLIB_COMMON_BE_BEAM_ELEMENTS_CXX_HPP__
 
 #include "cxx/common/be/beam_elements.h"
+#include "cxx/common/be/beam_elements_base.hpp"
 #include "cxx/common/be/cavity/cavity.hpp"
 #include "cxx/common/be/dipedge/dipedge.hpp"
 #include "cxx/common/be/drift/drift.hpp"
