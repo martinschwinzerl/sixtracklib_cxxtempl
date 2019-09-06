@@ -12,9 +12,10 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT >::type
     Drift_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeDriftBase< BeData > const& SIXTRL_RESTRICT_REF drift )
+        BeDriftInterface< BeData > const& SIXTRL_RESTRICT_REF drift )
     {
         typedef typename TrackParticleBase< PData >::real_t real_t;
 
@@ -32,9 +33,10 @@ namespace sixtrack_cxx
     }
 
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DRIFT_EXACT >::type
     DriftExact_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeDriftExactBase< BeData > const& SIXTRL_RESTRICT_REF drift )
+        BeDriftExactInterface< BeData > const& SIXTRL_RESTRICT_REF drift )
     {
         typedef typename TrackParticleBase< PData >::real_t real_t;
         typedef typename TrackParticleBase< PData >::int_t  state_t;

@@ -13,9 +13,10 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_XYSHIFT >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_XYSHIFT >::type
     XYShift_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeXYShiftBase< BeData > const& SIXTRL_RESTRICT_REF xyshift )
+        BeXYShiftInterface< BeData > const& SIXTRL_RESTRICT_REF xyshift )
     {
         particle.x -= xyshift.dx;
         particle.y -= xyshift.dy;

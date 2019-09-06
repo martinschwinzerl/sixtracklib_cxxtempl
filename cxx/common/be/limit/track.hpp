@@ -12,13 +12,14 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT >::type
     LimitRect_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeLimitRectBase< BeData > const& SIXTRL_RESTRICT_REF limit )
+        BeLimitRectInterface< BeData > const& SIXTRL_RESTRICT_REF limit )
     {
-        typedef sixtrack_cxx::TrackParticleBase< PData >    particle_t;
-        typedef typename particle_t::real_t                 real_t;
-        typedef typename particle_t::int_t                  state_t;
+        typedef sixtrack_cxx::TrackParticleBase< PData > particle_t;
+        typedef typename particle_t::real_t real_t;
+        typedef typename particle_t::int_t  state_t;
 
         state_t state = particle.state;
         if( state == ( state_t )0 ) return SIXTRL_CXX_NAMESPACE::TRACK_SUCCESS;
@@ -33,13 +34,14 @@ namespace sixtrack_cxx
     }
 
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_ELLIPSE >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_ELLIPSE >::type
     LimitEllipse_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeLimitEllipseBase< BeData > const& SIXTRL_RESTRICT_REF limit )
+        BeLimitEllipseInterface< BeData > const& SIXTRL_RESTRICT_REF limit )
     {
-        typedef sixtrack_cxx::TrackParticleBase< PData >    particle_t;
-        typedef typename particle_t::real_t                 real_t;
-        typedef typename particle_t::int_t                  state_t;
+        typedef sixtrack_cxx::TrackParticleBase< PData > particle_t;
+        typedef typename particle_t::real_t real_t;
+        typedef typename particle_t::int_t  state_t;
 
         if( particle.state == ( state_t )0 )
                 return SIXTRL_CXX_NAMESPACE::TRACK_SUCCESS;

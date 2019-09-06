@@ -3,6 +3,7 @@
 
 #include "sixtracklib/sixtracklib.hpp"
 
+#include "cxx/common/be/beam_elements_base.hpp"
 #include "cxx/common/be/multipole/be_multipole_traits.hpp"
 #include "cxx/common/be/multipole/be_multipole_data.hpp"
 #include "cxx/common/be/multipole/be_multipole.h"
@@ -10,97 +11,119 @@
 namespace sixtrack_cxx
 {
     template< class BeObjData >
-    class BeMultipoleBase : public BeObjData
+    class BeMultipoleInterface :
+        public sixtrack_cxx::BeamElementBase< BeObjData, ::NS(BeMultipole) >
     {
         public:
 
-        typedef BeObjData be_data_t;
-        typedef sixtrack_cxx::BeMultipoleTraits< BeObjData > mp_traits_t;
-        typedef typename mp_traits_t::real_t real_t;
-        typedef typename mp_traits_t::order_t order_t;
-        typedef ::NS(BeMultipole) c_api_t;
+        typedef sixtrack_cxx::BeamElementBase< BeObjData, ::NS(BeMultipole) >
+                _base_t;
+        typedef typename _base_t::c_api_t c_api_t;
 
-        static SIXTRL_FN constexpr bool SupportsCObjectsStorage()
-        {
-            return sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer<
-                BeObjData >();
-        }
+        template< typename T > using can_store_cobj_t =
+            std::enable_if< _base_t::SupportsCObjectsStorage(), T >;
 
-        template< typename T >
-        using can_store_cobj_t = std::enable_if<
-            BeMultipoleBase< BeObjData >::SupportsCObjectsStorage(), T >;
+        typedef sixtrack_cxx::BeMultipoleTraits< BeObjData > be_traits_t;
+        typedef typename be_traits_t::real_t  real_t;
+        typedef typename be_traits_t::order_t order_t;
 
-        static SIXTRL_FN constexpr bool HasCApiMemoryLayout()
-        {
-            return sixtrack_cxx::ObjDataStoreTraits<
-                BeObjData >::HasCApiLayout();
-        }
+        static_assert( sixtrack_cxx::ObjData_get_num_data_ptrs< BeObjData >() ==
+            ::NS(buffer_size_t){ 1 },
+            "BeMultipole* implementations are required to have one dataptr" );
+
+        static_assert( sixtrack_cxx::ObjData_dataptr_type_count_can_vary<
+            BeObjData >(), "BeMultipole* implementations are expected to "
+            "have a storage size dependent on the order parameter" );
 
         /* ----------------------------------------------------------------- */
 
-        SIXTRL_FN BeMultipoleBase() : BeObjData()
+        SIXTRL_FN BeMultipoleInterface()
         {
-            this->order  = order_t{ 0 };
-            this->length = real_t{ 0.0 };
-            this->hxl    = real_t{ 0.0 };
-            this->hyl    = real_t{ 0.0 };
-            this->bal    = nullptr;
+            this->order = order_t{ 0 };
+            this->bal = nullptr;
+            this->init();
         }
 
-        SIXTRL_FN explicit BeMultipoleBase( order_t const _order,
-            real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr ) : BeObjData()
+        SIXTRL_FN explicit BeMultipoleInterface(
+            const c_api_t *const SIXTRL_RESTRICT mp )
         {
-            this->order  = _order;
-            this->length = real_t{ 0.0 };
-            this->hxl    = real_t{ 0.0 };
-            this->hyl    = real_t{ 0.0 };
-            this->bal    = ptr_to_ext_bal;
+            this->order = order_t( 0 );
+            this->bal = nullptr;
+
+            if( mp != nullptr )
+            {
+                this->init( mp );
+            }
+            else
+            {
+                this->init();
+            }
         }
 
-        SIXTRL_FN BeMultipoleBase( order_t const _order,
+        SIXTRL_FN explicit BeMultipoleInterface( order_t const _order,
+            real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr )
+        {
+            this->order = order_t{ 0 };
+            this->bal = nullptr;
+            this->init( _order, ptr_to_ext_bal );
+        }
+
+        SIXTRL_FN BeMultipoleInterface( order_t const _order,
             real_t const& SIXTRL_RESTRICT_REF _length,
             real_t const& SIXTRL_RESTRICT_REF _hxl,
             real_t const& SIXTRL_RESTRICT_REF _hyl,
-            real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr ) : BeObjData()
+            real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr )
         {
-            this->order  = _order;
-            this->length = _length;
-            this->hxl    = _hxl;
-            this->hyl    = _hyl;
-            this->bal    = ptr_to_ext_bal;
+            this->init( _order, _length, _hxl, _hyl, ptr_to_ext_bal );
         }
 
-        SIXTRL_FN BeMultipoleBase(
-            BeMultipoleBase< BeObjData > const& other) = default;
+        SIXTRL_FN BeMultipoleInterface(
+            BeMultipoleInterface< BeObjData > const& other) = default;
 
-        SIXTRL_FN BeMultipoleBase(
-            BeMultipoleBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeMultipoleInterface(
+            BeMultipoleInterface< BeObjData >&& other ) = default;
 
-        SIXTRL_FN BeMultipoleBase< BeObjData >& operator=(
-            BeMultipoleBase< BeObjData > const& other) = default;
+        SIXTRL_FN BeMultipoleInterface< BeObjData >& operator=(
+            BeMultipoleInterface< BeObjData > const& other) = default;
 
-        SIXTRL_FN BeMultipoleBase< BeObjData >& operator=(
-            BeMultipoleBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeMultipoleInterface< BeObjData >& operator=(
+            BeMultipoleInterface< BeObjData >&& other ) = default;
 
-        SIXTRL_FN ~BeMultipoleBase() = default;
+        SIXTRL_FN ~BeMultipoleInterface() = default;
 
         SIXTRL_FN void init()
         {
-            this->order  = order_t{ 0 };
-            this->length = real_t{ 0.0 };
-            this->hxl    = real_t{ 0.0 };
-            this->hyl    = real_t{ 0.0 };
-            this->bal    = nullptr;
+            if( ( this->order == order_t{ 0 } ) && ( this->bal == nullptr ) )
+            {
+                this->length = real_t{ 0.0 };
+                this->hxl    = real_t{ 0.0 };
+                this->hyl    = real_t{ 0.0 };
+            }
+        }
+
+        SIXTRL_FN void init( const c_api_t *const SIXTRL_RESTRICT mp )
+        {
+            if( ( mp != nullptr ) && ( this->bal == nullptr ) &&
+                ( this->order != order_t{ 0 } ) )
+            {
+                this->order  = mp->order;
+                this->length = real_t( mp->length );
+                this->hxl    = real_t( mp->hxl );
+                this->hyl    = real_t( mp->hyl );
+            }
         }
 
         SIXTRL_FN void init( order_t const _order,
             real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr )
         {
-            this->order = _order;
-            this->length = real_t{ 0.0 };
-            this->hxl    = real_t{ 0.0 };
-            this->hyl    = real_t{ 0.0 };
-            this->bal    = ptr_to_ext_bal;
+            if( ( this->order == order_t{ 0 } ) && ( this->bal == nullptr ) )
+            {
+                this->order  = _order;
+                this->length = real_t{ 0.0 };
+                this->hxl    = real_t{ 0.0 };
+                this->hyl    = real_t{ 0.0 };
+                this->bal    = ptr_to_ext_bal;
+            }
         }
 
         SIXTRL_FN void init( order_t const _order,
@@ -109,11 +132,14 @@ namespace sixtrack_cxx
             real_t const& SIXTRL_RESTRICT_REF _hyl,
             real_t* SIXTRL_RESTRICT ptr_to_ext_bal = nullptr )
         {
-            this->order  = _order;
-            this->length = _length;
-            this->hxl    = _hxl;
-            this->hyl    = _hyl;
-            this->bal    = ptr_to_ext_bal;
+            if( ( this->order == order_t{ 0 } ) && ( this->bal == nullptr ) )
+            {
+                this->order  = _order;
+                this->length = _length;
+                this->hxl    = _hxl;
+                this->hyl    = _hyl;
+                this->bal    = ptr_to_ext_bal;
+            }
         }
 
         /* ----------------------------------------------------------------- */
@@ -131,7 +157,7 @@ namespace sixtrack_cxx
 
                 Iter in_it  = other_begin;
                 Iter in_end = other_begin;
-                std::advance( in_end, this->getNumParameters() );
+                std::advance( in_end, this->getNumBalParameters() );
 
                 status = ::NS(ARCH_STATUS_SUCCESS);
 
@@ -146,77 +172,40 @@ namespace sixtrack_cxx
 
         /* ----------------------------------------------------------------- */
 
-        real_t const& operator[]( order_t const index ) const SIXTRL_NOEXCEPT
+        SIXTRL_FN real_t const& operator[](
+            order_t const index ) const SIXTRL_NOEXCEPT
         {
-            SIXTRL_ASSERT( this->getNumParameters() > index );
+            SIXTRL_ASSERT( this->getNumBalParameters() > index );
             SIXTRL_ASSERT( this->bal != nullptr );
-
             return this->bal[ index ];
         }
 
-        real_t& operator[]( order_t const index ) SIXTRL_NOEXCEPT
+        SIXTRL_FN real_t& operator[]( order_t const index ) SIXTRL_NOEXCEPT
         {
-            SIXTRL_ASSERT( this->getNumParameters() > index );
+            SIXTRL_ASSERT( this->getNumBalParameters() > index );
             SIXTRL_ASSERT( this->bal != nullptr );
-
             return this->bal[ index ];
         }
 
-        real_t const& getBal( order_t const index ) const SIXTRL_NOEXCEPT
+        SIXTRL_FN real_t const& getConstBal(
+            order_t const index ) const SIXTRL_NOEXCEPT
         {
-            SIXTRL_ASSERT( this->getNumParameters() > index );
+            SIXTRL_ASSERT( this->getNumBalParameters() > index );
             SIXTRL_ASSERT( this->bal != nullptr );
-
             return this->bal[ index ];
         }
 
-        real_t& getBal( order_t const index ) SIXTRL_NOEXCEPT
+        SIXTRL_FN real_t& getBal( order_t const index ) SIXTRL_NOEXCEPT
         {
-            SIXTRL_ASSERT( this->getNumParameters() > index );
+            SIXTRL_ASSERT( this->getNumBalParameters() > index );
             SIXTRL_ASSERT( this->bal != nullptr );
-
             return this->bal[ index ];
         }
 
-        /* TODO: Add missing calculation of inverse factorial factors ->
-         * this is an interesting test for the generic type! */
+        SIXTRL_FN order_t getOrder() const SIXTRL_NOEXCEPT
+        { return this->order; }
 
-        /*
-        real_t const& knl( order_t const index ) const SIXTRL_NOEXCEPT
-        {
-            namespace stcxx = sixtrack_cxx;
-            order_t const knl_index = static_cast< order_t >( 2u ) * index;
-            return stcxx::BeMultipoleData_get_const_bal( *this, knl_index );
-        }
-
-        real_t const& ksl( order_t const index ) const SIXTRL_NOEXCEPT
-        {
-            namespace stcxx = sixtrack_cxx;
-            order_t const ksl_index = static_cast< order_t >( 2u ) * index +
-                static_cast< order_t >( 1u );
-            return stcxx::BeMultipoleData_get_const_bal( *this, ksl_index );
-        }
-
-        real_t& knl( order_t const index ) SIXTRL_NOEXCEPT
-        {
-            order_t const knl_index = static_cast< order_t >( 2u ) * index;
-            return sixtrack_cxx::BeMultipoleData_get_bal( *this, knl_index );
-        }
-
-        real_t& ksl( order_t const index ) SIXTRL_NOEXCEPT
-        {
-            order_t const ksl_index = static_cast< order_t >( 2u ) * index +
-                static_cast< order_t >( 1u );
-            return sixtrack_cxx::BeMultipoleData_get_bal( *this, ksl_index );
-        }
-        */
-
-        order_t getOrder() const SIXTRL_NOEXCEPT
-        {
-            return this->order;
-        }
-
-        order_t getNumParameters() const SIXTRL_NOEXCEPT
+        SIXTRL_FN order_t getNumBalParameters() const SIXTRL_NOEXCEPT
         {
             return order_t{ 2 } * ( this->order + order_t{ 1 } );
         }
@@ -231,216 +220,123 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            using  size_t = ::NS(buffer_size_t);
-            using _data_t = BeObjData;
-            using _this_t = sixtrack_cxx::BeMultipoleBase< _data_t >;
-            using _traits_t = sixtrack_cxx::ObjDataStoreLayoutTraits< _data_t >;
-
-            constexpr size_t NUM_DATAPTRS = _traits_t::GetNumDataPtrs();
-            size_t COUNTS[ NUM_DATAPTRS ];
-            std::fill( &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ], size_t{ 0 } );
-
+            namespace  st = SIXTRL_CXX_NAMESPACE;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
             _this_t temp( order, nullptr );
 
-            return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE, sizeof( _this_t ),
-                &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ], requ_num_objects,
-                    requ_num_slots, requ_num_dataptrs );
+            return sixtrack_cxx::Obj_can_store_on_buffer< BeObjData >( buffer,
+                st::OBJECT_TYPE_MULTIPOLE, temp.ptrBeData(), sizeof( _this_t ),
+                    requ_num_objects, requ_num_slots, requ_num_dataptrs );
         }
 
-        static SIXTRL_FN
-        typename can_store_cobj_t< BeMultipoleBase< BeObjData >* >::type
-        CreateNewObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer,
-            order_t const order )
+        static SIXTRL_FN typename can_store_cobj_t< BeMultipoleInterface<
+            BeObjData >* >::type CreateNewObject(
+                ::NS(Buffer)* SIXTRL_RESTRICT buffer, order_t const order )
         {
-            using  size_t = ::NS(buffer_size_t);
-            using _data_t = BeObjData;
-            using _this_t = sixtrack_cxx::BeMultipoleBase< _data_t >;
-            using _traits_t = sixtrack_cxx::ObjDataStoreLayoutTraits< _data_t >;
-
-            constexpr size_t NUM_DATAPTRS = _traits_t::GetNumDataPtrs();
-            size_t COUNTS[ NUM_DATAPTRS ];
-            std::fill( &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ], size_t{ 0 } );
-
+            namespace  st = SIXTRL_CXX_NAMESPACE;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
             _this_t temp( order, nullptr );
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE,
-                sizeof( _this_t ), &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ] ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                    st::OBJECT_TYPE_MULTIPOLE, temp.ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         template< typename... Args > static SIXTRL_FN
-        typename can_store_cobj_t< BeMultipoleBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeMultipoleInterface< BeObjData >* >::type
         AddObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
         {
-            using  size_t = ::NS(buffer_size_t);
-            using _data_t = BeObjData;
-            using _this_t = sixtrack_cxx::BeMultipoleBase< _data_t >;
-            using _traits_t = sixtrack_cxx::ObjDataStoreLayoutTraits< _data_t >;
-
-            constexpr size_t NUM_DATAPTRS = _traits_t::GetNumDataPtrs();
-            size_t COUNTS[ NUM_DATAPTRS ];
-            std::fill( &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ], size_t{ 0 } );
-
+            namespace  st = SIXTRL_CXX_NAMESPACE;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
             _this_t temp( std::forward< Args >( args )... );
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE,
-                    sizeof( _this_t ), &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ] ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                    st::OBJECT_TYPE_MULTIPOLE, temp.ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
-        SIXTRL_FN typename can_store_cobj_t< BeMultipoleBase< BeObjData >* >::type
-        storeCopy( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
+        SIXTRL_FN typename can_store_cobj_t< BeMultipoleInterface< BeObjData
+            >* >::type storeCopy( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
-            using  size_t = ::NS(buffer_size_t);
-            using _data_t = BeObjData;
-            using _this_t = sixtrack_cxx::BeMultipoleBase< _data_t >;
-            using _traits_t = sixtrack_cxx::ObjDataStoreLayoutTraits< _data_t >;
-
-            constexpr size_t NUM_DATAPTRS = _traits_t::GetNumDataPtrs();
-            size_t COUNTS[ NUM_DATAPTRS ];
-            std::fill( &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ], size_t{ 0 } );
+            namespace  st = SIXTRL_CXX_NAMESPACE;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                    SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE,
-                    sizeof( _this_t ), &COUNTS[ 0 ], &COUNTS[ NUM_DATAPTRS ] ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                    st::OBJECT_TYPE_MULTIPOLE, this->ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         /* -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
 
-        static SIXTRL_FN
-        typename can_store_cobj_t< BeMultipoleBase< BeObjData > const* >::type
+        static SIXTRL_FN typename can_store_cobj_t< BeMultipoleInterface<
+            BeObjData > const* >::type
         GetConstObj( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeMultipoleBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
             return ObjStore_get_ptr_const_obj_from_info< _this_t >(
                 ::NS(Buffer_get_const_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeMultipoleBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeMultipoleInterface< BeObjData >* >::type
         GetObj( ::NS(Buffer)* SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeMultipoleBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeMultipoleInterface< BeObjData >;
             return ObjStore_get_ptr_obj_from_info< _this_t >(
                 ::NS(Buffer_get_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
-
-        /* ----------------------------------------------------------------- */
-
-        SIXTRL_FN be_data_t* ptrBeData() SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t* >( this );
-        }
-
-        SIXTRL_FN be_data_t const* ptrBeData() const SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t const* >( this );
-        }
-
-        SIXTRL_FN be_data_t& beData() SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t& >( *this );
-        }
-
-        SIXTRL_FN be_data_t const& beData() const SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t const& >( *this );
-        }
     };
 
-    template< class MultiPoleType >
-    bool MultiPole_can_store_on_buffer(
-        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_objects = nullptr,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_slots = nullptr,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_dataptrs = nullptr )
-    {
-        return MultiPoleType::CanStoreOnBuffer( buffer,
-            required_num_objects, required_num_slots, required_num_dataptrs );
-    }
-
-    template< class MultiPoleType >
-    MultiPoleType* MultiPole_new( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
-    {
-        return MultiPoleType::CreateNewObject( buffer );
-    }
-
-    template< class MultiPoleType, typename... Args >
-    MultiPoleType* MultiPole_add( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
-    {
-        return MultiPoleType::AddObject( buffer, std::forward< Args >( args )... );
-    }
-
-    template< class MultiPoleType >
-    MultiPoleType const* MultiPole_get_const(
-        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t) const index )
-    {
-        return MultiPoleType::GetConstObj( buffer, index );
-    }
-
-    template< class MultiPoleType >
-    MultiPoleType* MultiPole_get( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t) const index )
-    {
-        return MultiPoleType::GetObj( buffer, index );
-    }
-
-    /* --------------------------------------------------------------------- */
-
     template< class BeObjData >
-    typename BeMultipoleBase< BeObjData >::order_t Multipole_get_order(
-        BeMultipoleBase< BeObjData > const& SIXTRL_RESTRICT_REF mp )
+    typename BeMultipoleInterface< BeObjData >::order_t Multipole_get_order(
+        BeMultipoleInterface< BeObjData > const& SIXTRL_RESTRICT_REF mp )
     {
         return mp.getOrder();
     }
 
     template< class BeObjData >
-    typename BeMultipoleBase< BeObjData >::order_t
+    typename BeMultipoleInterface< BeObjData >::order_t
     Multipole_get_num_bal_parameters(
-        BeMultipoleBase< BeObjData > const& SIXTRL_RESTRICT_REF mp )
+        BeMultipoleInterface< BeObjData > const& SIXTRL_RESTRICT_REF mp )
     {
-        return mp.getNumParameters();
+        return mp.getNumBalParameters();
     }
 
     template< class BeObjData >
-    typename BeMultipoleBase< BeObjData >::real_t const&
+    typename BeMultipoleInterface< BeObjData >::real_t const&
     Multipole_get_const_bal(
-        BeMultipoleBase< BeObjData > const& SIXTRL_RESTRICT_REF mp,
-        typename BeMultipoleBase< BeObjData >::order_t const bal_index )
+        BeMultipoleInterface< BeObjData > const& SIXTRL_RESTRICT_REF mp,
+        typename BeMultipoleInterface< BeObjData >::order_t const bal_index )
     {
         return mp[ bal_index ];
     }
 
     template< class BeObjData >
-    typename BeMultipoleBase< BeObjData >::real_t& Multipole_get_bal(
-        BeMultipoleBase< BeObjData >& SIXTRL_RESTRICT_REF mp,
-        typename BeMultipoleBase< BeObjData >::order_t const bal_index )
+    typename BeMultipoleInterface< BeObjData >::real_t& Multipole_get_bal(
+        BeMultipoleInterface< BeObjData >& SIXTRL_RESTRICT_REF mp,
+        typename BeMultipoleInterface< BeObjData >::order_t const bal_index )
     {
         return mp[ bal_index ];
     }
 
     /* --------------------------------------------------------------------- */
 
-    typedef BeMultipoleBase< ::NS(BeMultipole) >            CBeMultipole;
-    typedef BeMultipoleBase< BeMultipoleData< double > >    BeMultipole;
+    typedef BeMultipoleInterface< ::NS(BeMultipole) > CBeMultipole;
+    typedef BeMultipoleInterface< BeMultipoleData< double > > BeMultipole;
 
     template< class R,
         std::size_t RAlign = sixtrack_cxx::TypeStoreTraits< R >::StorageAlign(),
         std::size_t OAlign = sixtrack_cxx::TypeStoreTraits<
             ::NS(be_multipole_order_t) >::StorageAlign() >
-    using TBeMultipole = BeMultipoleBase< BeMultipoleData< R, RAlign, OAlign > >;
+    using TBeMultipole = BeMultipoleInterface< BeMultipoleData<
+        R, RAlign, OAlign > >;
 }
 
 #endif /* SIXTRACKLIB_COMMON_BE_MULTIPOLE_BE_MULTIPOLE_CXX_HPP__ */

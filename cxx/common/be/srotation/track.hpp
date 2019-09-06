@@ -14,15 +14,16 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_SROTATION >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_SROTATION >::type
     SRotation_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeSRotationBase< BeData > const& SIXTRL_RESTRICT_REF rot )
+        BeSRotationInterface< BeData > const& SIXTRL_RESTRICT_REF rot )
     {
-        typedef sixtrack_cxx::TrackParticleBase< PData >    particle_t;
-        typedef typename particle_t::real_t                 real_t;
+        typedef sixtrack_cxx::TrackParticleBase< PData >     particle_t;
+        typedef typename particle_t::real_t                  real_t;
 
-        typedef sixtrack_cxx::BeSRotationBase< BeData >     srotation_t;
-        typedef typename srotation_t::real_t                be_real_t;
+        typedef sixtrack_cxx::BeSRotationInterface< BeData > srotation_t;
+        typedef typename srotation_t::real_t                 be_real_t;
 
         be_real_t const minus_sin_z = -( rot.sin_z );
         real_t temp_x = particle.x  * rot.cos_z   + particle.y  * rot.sin_z;

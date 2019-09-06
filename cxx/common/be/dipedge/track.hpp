@@ -11,9 +11,10 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_DIPEDGE >::type
     DipoleEdge_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeDipoleEdgeBase< BeData > const& SIXTRL_RESTRICT_REF dipedge )
+        BeDipoleEdgeInterface< BeData > const& SIXTRL_RESTRICT_REF dipedge )
     {
         particle.px += particle.x * dipedge.r21;
         particle.py += particle.y * dipedge.r43;

@@ -12,17 +12,18 @@
 namespace sixtrack_cxx
 {
     template< class PData, class BeData >
-    typename track_result_t< PData, BeData, SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE >::type
+    typename track_result_t< PData, BeData,
+        SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_MULTIPOLE >::type
     Multipole_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeMultipoleBase< BeData > const& SIXTRL_RESTRICT_REF mp )
+        BeMultipoleInterface< BeData > const& SIXTRL_RESTRICT_REF mp )
     {
         typedef sixtrack_cxx::TrackParticleBase< PData > particle_t;
         typedef typename particle_t::real_t              real_t;
         typedef sixtrack_cxx::MathConstants< real_t >    real_math_constants_t;
 
-        typedef sixtrack_cxx::BeMultipoleBase< BeData >  be_multipole_t;
-        typedef typename be_multipole_t::real_t          mp_real_t;
-        typedef typename be_multipole_t::order_t         mp_order_t;
+        typedef sixtrack_cxx::BeMultipoleInterface< BeData > be_multipole_t;
+        typedef typename be_multipole_t::real_t  mp_real_t;
+        typedef typename be_multipole_t::order_t mp_order_t;
         typedef sixtrack_cxx::MathConstants< mp_real_t > mp_real_math_constants_t;
 
         mp_order_t index_x =

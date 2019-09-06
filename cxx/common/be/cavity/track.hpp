@@ -18,7 +18,7 @@ namespace sixtrack_cxx
     typename track_result_t< PData, BeData,
             SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_CAVITY >::type
     Cavity_track( TrackParticleBase< PData >& SIXTRL_RESTRICT_REF particle,
-        BeCavityBase< BeData > const& SIXTRL_RESTRICT_REF cavity )
+        BeCavityInterface< BeData > const& SIXTRL_RESTRICT_REF cavity )
     {
         typedef TrackParticleBase< PData >  particle_t;
         typedef typename particle_t::real_t real_t;

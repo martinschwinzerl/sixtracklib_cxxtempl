@@ -3,81 +3,84 @@
 
 #include "sixtracklib/sixtracklib.hpp"
 
+#include "cxx/common/be/beam_elements_base.hpp"
 #include "cxx/common/be/limit/be_limit_traits.hpp"
 #include "cxx/common/be/limit/be_limit_rect_data.hpp"
 #include "cxx/common/be/limit/be_limit_rect.h"
 
 namespace sixtrack_cxx
 {
-    template< class BeObjData >
-    class BeLimitRectBase : public BeObjData
+    template< class BeObjData > class BeLimitRectInterface :
+        public sixtrack_cxx::BeamElementBase< BeObjData, ::NS(BeLimitRect) >
     {
         public:
 
-        typedef BeObjData be_data_t;
-        typedef sixtrack_cxx::BeLimitRectTraits< BeObjData > limit_traits_t;
-        typedef typename limit_traits_t::real_t real_t;
-        typedef ::NS(BeLimitRect) c_api_t;
+        typedef sixtrack_cxx::BeamElementBase< BeObjData,
+            ::NS(BeLimitRect) > _base_t;
+        typedef typename _base_t::c_api_t c_api_t;
 
-        static SIXTRL_FN constexpr bool SupportsCObjectsStorage()
-        {
-            return sixtrack_cxx::ObjData_can_be_stored_on_cobjects_buffer<
-                BeObjData >();
-        }
+        template< typename T > using can_store_cobj_t =
+            std::enable_if< _base_t::SupportsCObjectsStorage(), T >;
 
-        template< typename T >
-        using can_store_cobj_t = std::enable_if<
-            BeLimitRectBase< BeObjData >::SupportsCObjectsStorage(), T >;
+        typedef sixtrack_cxx::BeLimitRectTraits< BeObjData > be_traits_t;
+        typedef typename be_traits_t::real_t real_t;
 
-        static SIXTRL_FN constexpr bool HasCApiMemoryLayout()
-        {
-            return sixtrack_cxx::ObjDataStoreTraits< BeObjData >::HasCApiLayout();
-        }
+        static_assert( !sixtrack_cxx::ObjData_has_data_ptrs< BeObjData >(),
+            "BeLimitRect* implementations aren't supposed to have dataptrs" );
 
         /* ----------------------------------------------------------------- */
 
-        SIXTRL_FN BeLimitRectBase() : BeObjData()
-        {
-            this->min_x = real_t{ -1.0 };   this->max_x = real_t{  1.0 };
-            this->min_y = real_t{ -1.0 };   this->max_y = real_t{  1.0 };
-        }
+        SIXTRL_FN BeLimitRectInterface() { this->init(); }
 
-        SIXTRL_FN BeLimitRectBase(
+        SIXTRL_FN explicit BeLimitRectInterface( const c_api_t *const
+            SIXTRL_RESTRICT limit ) { this->init( limit ); }
+
+        SIXTRL_FN BeLimitRectInterface(
             real_t const& SIXTRL_RESTRICT_REF min_coord,
-            real_t const& SIXTRL_RESTRICT_REF max_coord ) : BeObjData()
+            real_t const& SIXTRL_RESTRICT_REF max_coord )
         {
-            this->min_x = min_coord;    this->max_x = max_coord;
-            this->min_y = min_coord;    this->max_y = max_coord;
+            this->init( min_coord, max_coord );
         }
 
-        SIXTRL_FN BeLimitRectBase(
+        SIXTRL_FN BeLimitRectInterface(
             real_t const& SIXTRL_RESTRICT_REF min_x,
             real_t const& SIXTRL_RESTRICT_REF max_x,
             real_t const& SIXTRL_RESTRICT_REF min_y,
-            real_t const& SIXTRL_RESTRICT_REF max_y ) : BeObjData()
+            real_t const& SIXTRL_RESTRICT_REF max_y )
         {
-            this->min_x = min_x;   this->max_x = max_x;
-            this->min_y = min_y;   this->max_y = max_y;
+            this->init( min_x, max_x, min_y, max_y );
         }
 
-        SIXTRL_FN BeLimitRectBase(
-            BeLimitRectBase< BeObjData > const& other) = default;
+        SIXTRL_FN BeLimitRectInterface(
+            BeLimitRectInterface< BeObjData > const& other) = default;
 
-        SIXTRL_FN BeLimitRectBase(
-            BeLimitRectBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeLimitRectInterface(
+            BeLimitRectInterface< BeObjData >&& other ) = default;
 
-        SIXTRL_FN BeLimitRectBase< BeObjData >& operator=(
-            BeLimitRectBase< BeObjData > const& other) = default;
+        SIXTRL_FN BeLimitRectInterface< BeObjData >& operator=(
+            BeLimitRectInterface< BeObjData > const& other) = default;
 
-        SIXTRL_FN BeLimitRectBase< BeObjData >& operator=(
-            BeLimitRectBase< BeObjData >&& other ) = default;
+        SIXTRL_FN BeLimitRectInterface< BeObjData >& operator=(
+            BeLimitRectInterface< BeObjData >&& other ) = default;
 
-        SIXTRL_FN ~BeLimitRectBase() = default;
+        SIXTRL_FN ~BeLimitRectInterface() = default;
 
         SIXTRL_FN void init()
         {
             this->min_x = real_t{ -1.0 };  this->max_x = real_t{  1.0 };
             this->min_y = real_t{ -1.0 };  this->max_y = real_t{  1.0 };
+        }
+
+        SIXTRL_FN void init( const c_api_t *const SIXTRL_RESTRICT limit )
+        {
+            if( limit != nullptr )
+            {
+                this->min_x = real_t( limit->min_x );
+                this->max_x = real_t( limit->max_x );
+                this->min_y = real_t( limit->min_y );
+                this->max_y = real_t( limit->max_y );
+            }
+            else this->init();
         }
 
         SIXTRL_FN void init( real_t const& SIXTRL_RESTRICT_REF min_coord,
@@ -105,146 +108,80 @@ namespace sixtrack_cxx
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_slots = nullptr,
             ::NS(buffer_size_t)* SIXTRL_RESTRICT requ_num_dataptrs = nullptr )
         {
-            typedef sixtrack_cxx::BeLimitRectBase< BeObjData > _this_t;
-            _this_t temp;
-
-            return sixtrack_cxx::Obj_can_store_on_buffer( buffer, temp.beData(),
+            typedef sixtrack_cxx::BeLimitRectInterface< BeObjData > _this_t;
+            return sixtrack_cxx::Obj_can_store_on_buffer< BeObjData >( buffer,
                 SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, sizeof( _this_t ),
-                    nullptr, nullptr, requ_num_objects, requ_num_slots,
-                        requ_num_dataptrs );
+                    requ_num_objects, requ_num_slots, requ_num_dataptrs );
         }
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeLimitRectBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeLimitRectInterface< BeObjData >* >::type
         CreateNewObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
-            using _this_t = sixtrack_cxx::BeLimitRectBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeLimitRectInterface< BeObjData >;
             _this_t temp;
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, sizeof( _this_t ) ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, temp.ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         template< typename... Args >
         static SIXTRL_FN
-        typename can_store_cobj_t< BeLimitRectBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeLimitRectInterface< BeObjData >* >::type
         AddObject( ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
         {
-            using _this_t = sixtrack_cxx::BeLimitRectBase< BeObjData >;
-            _this_t temp;
-            temp.init( std::forward< Args >( args )... );
+            using _this_t = sixtrack_cxx::BeLimitRectInterface< BeObjData >;
+            _this_t temp( std::forward< Args >( args )... );
 
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, temp.beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, sizeof( _this_t ) ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, temp.ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
-        SIXTRL_FN typename can_store_cobj_t< BeLimitRectBase< BeObjData >* >::type
+        SIXTRL_FN typename can_store_cobj_t< BeLimitRectInterface< BeObjData >* >::type
         storeCopy( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
         {
-            using _this_t = sixtrack_cxx::BeLimitRectBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeLimitRectInterface< BeObjData >;
             return sixtrack_cxx::ObjStore_get_ptr_obj_from_info< _this_t >(
-                sixtrack_cxx::Obj_store_on_buffer( buffer, this->beData(),
-                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, sizeof( _this_t ) ),
+                sixtrack_cxx::Obj_store_on_buffer( buffer,
+                SIXTRL_CXX_NAMESPACE::OBJECT_TYPE_LIMIT_RECT, this->ptrBeData() ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         /* -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeLimitRectBase< BeObjData > const* >::type
+        typename can_store_cobj_t< BeLimitRectInterface< BeObjData > const* >::type
         GetConstObj( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeLimitRectBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeLimitRectInterface< BeObjData >;
             return ObjStore_get_ptr_const_obj_from_info< _this_t >(
                 ::NS(Buffer_get_const_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
 
         static SIXTRL_FN
-        typename can_store_cobj_t< BeLimitRectBase< BeObjData >* >::type
+        typename can_store_cobj_t< BeLimitRectInterface< BeObjData >* >::type
         GetObj( ::NS(Buffer)* SIXTRL_RESTRICT buffer,
                 ::NS(buffer_size_t) const index )
         {
-            using _this_t = sixtrack_cxx::BeLimitRectBase< BeObjData >;
+            using _this_t = sixtrack_cxx::BeLimitRectInterface< BeObjData >;
             return ObjStore_get_ptr_obj_from_info< _this_t >(
                 ::NS(Buffer_get_object)( buffer, index ),
                 sixtrack_cxx::ObjDataStoreTraits< BeObjData >::ObjTypeId() );
         }
-
-        /* ----------------------------------------------------------------- */
-
-        SIXTRL_FN be_data_t* ptrBeData() SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t* >( this );
-        }
-
-        SIXTRL_FN be_data_t const* ptrBeData() const SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t const* >( this );
-        }
-
-        SIXTRL_FN be_data_t& beData() SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t& >( *this );
-        }
-
-        SIXTRL_FN be_data_t const& beData() const SIXTRL_NOEXCEPT
-        {
-            return static_cast< be_data_t const& >( *this );
-        }
     };
 
-    template< class BeLimitRect >
-    bool BeLimitRect_can_store_on_buffer(
-        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_objects = nullptr,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_slots = nullptr,
-        ::NS(buffer_size_t)* SIXTRL_RESTRICT required_num_dataptrs = nullptr )
-    {
-        return BeLimitRect::CanStoreOnBuffer( buffer,
-            required_num_objects, required_num_slots, required_num_dataptrs );
-    }
-
-    template< class BeLimitRect >
-    BeLimitRect* BeLimitRect_new( ::NS(Buffer)* SIXTRL_RESTRICT buffer )
-    {
-        return BeLimitRect::CreateNewObject( buffer );
-    }
-
-    template< class BeLimitRect, typename... Args >
-    BeLimitRect* BeLimitRect_add(
-        ::NS(Buffer)* SIXTRL_RESTRICT buffer, Args&&... args )
-    {
-        return BeLimitRect::AddObject( buffer, std::forward< Args >( args )... );
-    }
-
-    template< class BeLimitRect >
-    BeLimitRect const* BeLimitRect_get_const(
-        const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t) const index )
-    {
-        return BeLimitRect::GetConstObj( buffer, index );
-    }
-
-    template< class BeLimitRect >
-    BeLimitRect* BeLimitRect_get( const ::NS(Buffer) *const SIXTRL_RESTRICT buffer,
-        ::NS(buffer_size_t) const index )
-    {
-        return BeLimitRect::GetObj( buffer, index );
-    }
-    /* --------------------------------------------------------------------- */
-
-    typedef BeLimitRectBase< ::NS(BeLimitRect) >            CBeLimitRect;
-    typedef BeLimitRectBase< BeLimitRectData< double > >    BeLimitRect;
+    typedef BeLimitRectInterface< ::NS(BeLimitRect) > CBeLimitRect;
+    typedef BeLimitRectInterface< BeLimitRectData< double > > BeLimitRect;
 
     template< class R, std::size_t RAlign =
         sixtrack_cxx::TypeStoreTraits< R >::StorageAlign() >
-    using TBeLimitRect = BeLimitRectBase< BeLimitRectData< R, RAlign > >;
+    using TBeLimitRect = BeLimitRectInterface< BeLimitRectData< R, RAlign > >;
 }
 
 #endif /* SIXTRACKLIB_COMMON_BE_LIMIT_RECT_BE_LIMIT_RECT_CXX_HPP__ */
