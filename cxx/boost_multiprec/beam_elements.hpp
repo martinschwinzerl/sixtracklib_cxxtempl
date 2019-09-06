@@ -333,55 +333,57 @@ namespace sixtrack_cxx
                 _obj_data_store_layout_traits_t;
 
         typedef ::NS(buffer_size_t) size_type;
-        typedef typename _obj_data_t::real_t real_t;
+        typedef ::NS(arch_status_t) status_t;
 
-        static constexpr size_type DataPtrSizes[ 1 ]   = { sizeof( real_t ) };
-        static constexpr size_type DataPtrOffsets[ 1 ] =
+        static SIXTRL_FN constexpr size_type NumDataPtrs() { return size_type{ 1 }; }
+        static SIXTRL_FN constexpr bool VarNumDataPtrCounts() { return true; }
+
+        static SIXTRL_FN status_t GetDataPtrTypeOffsets(
+            size_type* SIXTRL_RESTRICT offsets_begin )
         {
-            offsetof( _obj_data_t, bal )
-        };
-
-        static SIXTRL_FN constexpr size_type GetNumDataPtrs()
-        {
-            return ::NS(buffer_size_t){ 1 };
-        }
-
-        static SIXTRL_FN size_type const* GetPtrSizesBegin()
-        {
-            return &_obj_data_store_layout_traits_t::DataPtrSizes[ 0 ];
-        }
-
-        static SIXTRL_FN size_type const* GetPtrOffsetsBegin()
-        {
-            return &_obj_data_store_layout_traits_t::DataPtrOffsets[ 0 ];
-        }
-
-        static SIXTRL_FN SIXTRL_CXX_NAMESPACE::arch_status_t GetDataPtrsCounts(
-            _obj_data_t const& SIXTRL_RESTRICT_REF obj,
-            size_type* SIXTRL_RESTRICT counts_begin,
-            size_type* SIXTRL_RESTRICT counts_end )
-        {
-            typedef ::NS(be_multipole_order_t) order_t;
-            typedef std::ptrdiff_t diff_t;
-            namespace st = SIXTRL_CXX_NAMESPACE;
-
-            st::arch_status_t status = st::ARCH_STATUS_GENERAL_FAILURE;
-            diff_t in_length = diff_t{ 0 };
-
-            if( ( counts_begin != nullptr ) && ( counts_end != nullptr ) )
+            if( offsets_begin != nullptr )
             {
-                in_length = std::distance( counts_begin, counts_end );
+                *offsets_begin = offsetof( _obj_data_t, bal );
+                return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_SUCCESS;
             }
 
-            if( ( in_length > diff_t{ 0 } ) && ( obj.order >= order_t{ 0 } ) )
-            {
-                *counts_begin = static_cast< size_type >(
-                    order_t{ 2 } * obj.order  + order_t{ 1 } );
+            return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_GENERAL_FAILURE;
+        }
 
-                status = st::ARCH_STATUS_SUCCESS;
+        static SIXTRL_FN status_t GetDataPtrTypeSizes(
+            size_type* SIXTRL_RESTRICT sizes_begin )
+        {
+            if( sizes_begin != nullptr )
+            {
+                *sizes_begin = sizeof( typename _obj_data_t::real_t );
+                return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_SUCCESS;
             }
 
-            return status;
+            return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_GENERAL_FAILURE;
+        }
+
+        static SIXTRL_FN status_t GetDataPtrTypeCounts(
+            const _obj_data_t *const SIXTRL_RESTRICT mp_data,
+            size_type* SIXTRL_RESTRICT counts_begin )
+        {
+            typedef typename _obj_data_t::order_t order_t;
+
+            if( counts_begin != nullptr )
+            {
+                if( ( mp_data != nullptr ) && ( mp_data->order >= order_t{ 0 } ) )
+                {
+                    *counts_begin = static_cast< size_type >( 2 ) * (
+                        mp_data->order + order_t{ 1 } );
+                }
+                else
+                {
+                    *counts_begin = size_type{ 0 };
+                }
+
+                return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_SUCCESS;
+            }
+
+            return SIXTRL_CXX_NAMESPACE::ARCH_STATUS_GENERAL_FAILURE;
         }
     };
 
@@ -482,16 +484,33 @@ namespace sixtrack_cxx
         const ::NS(Buffer) *const SIXTRL_RESTRICT input_buffer,
         ::NS(Buffer)* SIXTRL_RESTRICT output_buffer )
     {
-        using real_t               = sixtrack_cxx::mp_float_n_t< N >;
-        using mp_cavity_n_t        = sixtrack_cxx::BeCavityBase< sixtrack_cxx::BMPBeCavityData< N > >;
-        using mp_drift_n_t         = sixtrack_cxx::BeDriftBase< sixtrack_cxx::BMPBeDriftData< N > >;
-        using mp_drift_exact_n_t   = sixtrack_cxx::BeDriftExactBase< sixtrack_cxx::BMPBeDriftExactData< N > >;
-        using mp_dipedge_n_t       = sixtrack_cxx::BeDipoleEdgeBase< sixtrack_cxx::BMPBeDipoleEdgeData< N > >;
-        using mp_limit_rect_n_t    = sixtrack_cxx::BeLimitRectBase< sixtrack_cxx::BMPBeLimitRectData< N > >;
-        using mp_limit_ellipse_n_t = sixtrack_cxx::BeLimitEllipseBase< sixtrack_cxx::BMPBeLimitEllipseData< N > >;
-        using mp_multipole_n_t     = sixtrack_cxx::BeMultipoleBase< sixtrack_cxx::BMPBeMultipoleData< N > >;
-        using mp_srotation_n_t     = sixtrack_cxx::BeSRotationBase< sixtrack_cxx::BMPBeSRotationData< N > >;
-        using mp_xyshift_n_t       = sixtrack_cxx::BeXYShiftBase< sixtrack_cxx::BMPBeXYShiftData< N > >;
+        using real_t = sixtrack_cxx::mp_float_n_t< N >;
+        using mp_cavity_n_t = sixtrack_cxx::BeCavityInterface<
+            sixtrack_cxx::BMPBeCavityData< N > >;
+
+        using mp_drift_n_t = sixtrack_cxx::BeDriftInterface<
+            sixtrack_cxx::BMPBeDriftData< N > >;
+
+        using mp_drift_exact_n_t = sixtrack_cxx::BeDriftExactInterface<
+            sixtrack_cxx::BMPBeDriftExactData< N > >;
+
+        using mp_dipedge_n_t = sixtrack_cxx::BeDipoleEdgeInterface<
+            sixtrack_cxx::BMPBeDipoleEdgeData< N > >;
+
+        using mp_limit_rect_n_t = sixtrack_cxx::BeLimitRectInterface<
+            sixtrack_cxx::BMPBeLimitRectData< N > >;
+
+        using mp_limit_ellipse_n_t = sixtrack_cxx::BeLimitEllipseInterface<
+            sixtrack_cxx::BMPBeLimitEllipseData< N > >;
+
+        using mp_multipole_n_t = sixtrack_cxx::BeMultipoleInterface<
+            sixtrack_cxx::BMPBeMultipoleData< N > >;
+
+        using mp_srotation_n_t = sixtrack_cxx::BeSRotationInterface<
+            sixtrack_cxx::BMPBeSRotationData< N > >;
+
+        using mp_xyshift_n_t = sixtrack_cxx::BeXYShiftInterface<
+            sixtrack_cxx::BMPBeXYShiftData< N > >;
 
         ::NS(Object) const* obj_it  =
             ::NS(Buffer_get_const_objects_begin)( input_buffer );
@@ -528,9 +547,8 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeDrift) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_drift_n_t::CreateNewObject( output_buffer );
+                    auto ptr = mp_drift_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
-                    if( ptr != nullptr ) ptr->length = real_t( in_ptr->length );
                     break;
                 }
 
@@ -539,7 +557,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeDriftExact) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_drift_exact_n_t::AddObject( output_buffer, real_t( in_ptr->length ) );
+                    auto ptr = mp_drift_exact_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -549,8 +567,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeCavity) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_cavity_n_t::AddObject( output_buffer, real_t( in_ptr->voltage ),
-                        real_t( in_ptr->frequency ), real_t( in_ptr->lag ) );
+                    auto ptr = mp_cavity_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -560,8 +577,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeDipoleEdge) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_dipedge_n_t::AddObject(
-                        output_buffer, real_t( in_ptr->r21 ), real_t( in_ptr->r43 ) );
+                    auto ptr = mp_dipedge_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -573,7 +589,8 @@ namespace sixtrack_cxx
 
                     auto ptr = mp_multipole_n_t::AddObject( output_buffer,
                         in_ptr->order, real_t( in_ptr->length ),
-                        real_t( in_ptr->hxl ), real_t( in_ptr->hyl ), nullptr );
+                        real_t( in_ptr->hxl ), real_t( in_ptr->hyl ),
+                        nullptr );
 
                     if( ptr != nullptr )
                     {
@@ -588,10 +605,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeLimitRect) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_limit_rect_n_t::AddObject( output_buffer,
-                        real_t( in_ptr->min_x ), real_t( in_ptr->max_x ),
-                        real_t( in_ptr->min_y ), real_t( in_ptr->max_y ) );
-
+                    auto ptr = mp_limit_rect_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -601,8 +615,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeLimitEllipse) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_limit_ellipse_n_t::AddObject( output_buffer,
-                        real_t( in_ptr->a_squ ), real_t( in_ptr->b_squ ) );
+                    auto ptr = mp_limit_ellipse_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -612,8 +625,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeSRotation) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_srotation_n_t::AddObject( output_buffer,
-                        real_t( in_ptr->cos_z ), real_t( in_ptr->sin_z ) );
+                    auto ptr = mp_srotation_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
@@ -623,8 +635,7 @@ namespace sixtrack_cxx
                     auto in_ptr = reinterpret_cast< ::NS(BeXYShift) const* >(
                         static_cast< std::uintptr_t >( base_addr ) );
 
-                    auto ptr = mp_xyshift_n_t::AddObject( output_buffer,
-                        real_t( in_ptr->dx ), real_t( in_ptr->dy ) );
+                    auto ptr = mp_xyshift_n_t::AddObject( output_buffer, in_ptr );
                     if( ptr == nullptr ) status = ::NS(ARCH_STATUS_GENERAL_FAILURE);
                     break;
                 }
